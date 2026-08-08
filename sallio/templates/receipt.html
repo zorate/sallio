@@ -78,11 +78,40 @@
         </button>
     </div>
 </div>
+
+<!-- Paywall Modal -->
+<div id="paywall-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; padding:32px 24px; border-radius:16px; max-width:400px; width:100%; text-align:center; box-shadow:0 12px 24px rgba(0,0,0,0.2); position:relative;">
+        <button onclick="document.getElementById('paywall-modal').style.display='none'" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-secondary);">&times;</button>
+        <div style="font-size:48px; margin-bottom:16px;">⭐</div>
+        <h2 style="color:var(--primary-color); margin-bottom:8px;">Quota Exceeded</h2>
+        <p style="color:var(--text-secondary); margin-bottom:24px; font-size:15px;">You've reached your free limit of 15 receipt generations for this week. Upgrade to Premium for unlimited receipts and advanced features!</p>
+        <a href="{{ url_for('billing.upgrade') }}" class="btn btn-primary" style="width:100%; padding:14px; font-size:16px; font-weight:600;">Upgrade to Premium</a>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script>
+async function _checkQuota() {
+    try {
+        const res = await fetch("{{ url_for('billing.track_receipt') }}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (res.status === 403) {
+            document.getElementById('paywall-modal').style.display = 'flex';
+            return false;
+        }
+        return res.ok;
+    } catch (err) {
+        console.error("Quota check failed", err);
+        return false;
+    }
+}
+
 async function _captureReceiptCanvas() {
     const receiptCard = document.getElementById('receipt-card');
     const bg = receiptCard.style.background;
@@ -98,8 +127,17 @@ async function _captureReceiptCanvas() {
 
 async function shareReceipt() {
     const btn = document.getElementById('share-btn');
-    const restore = Sallio.buttonLoading(btn, 'Generating image...');
+    const restore = Sallio.buttonLoading(btn, 'Checking...');
 
+    const hasQuota = await _checkQuota();
+    if (!hasQuota) {
+        restore();
+        return;
+    }
+
+    restore();
+    const generateRestore = Sallio.buttonLoading(btn, 'Generating image...');
+    
     try {
         const canvas = await _captureReceiptCanvas();
 
@@ -130,13 +168,22 @@ async function shareReceipt() {
         console.error('Receipt generation error:', err);
         Sallio.error('Could not generate receipt image. Please try again.');
     } finally {
-        restore();
+        generateRestore();
     }
 }
 
 async function downloadReceipt() {
     const btn = document.getElementById('download-btn');
-    const restore = Sallio.buttonLoading(btn, 'Downloading...');
+    const restore = Sallio.buttonLoading(btn, 'Checking...');
+
+    const hasQuota = await _checkQuota();
+    if (!hasQuota) {
+        restore();
+        return;
+    }
+
+    restore();
+    const generateRestore = Sallio.buttonLoading(btn, 'Downloading...');
 
     try {
         const canvas = await _captureReceiptCanvas();
@@ -147,7 +194,7 @@ async function downloadReceipt() {
     } catch (err) {
         Sallio.error('Could not download receipt. Please try again.');
     } finally {
-        restore();
+        generateRestore();
     }
 }
 

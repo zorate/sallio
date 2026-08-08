@@ -48,9 +48,13 @@
             </a>
             <div class="nav-links" role="list">
                 {% if current_user.is_authenticated %}
+                    {% set business = get_business(current_user.business_id) %}
                     <a href="{{ url_for('main.dashboard') }}" class="nav-link" role="listitem">Dashboard</a>
                     <a href="{{ url_for('main.new_sale') }}" class="nav-link nav-primary" role="listitem">+ New Sale</a>
                     <a href="{{ url_for('main.history') }}" class="nav-link" role="listitem">History</a>
+                    {% if not business or business.get('plan_type') != 'premium' %}
+                        <a href="{{ url_for('billing.upgrade') }}" class="nav-link" style="color:#d35400; border-color:#e67e22;" role="listitem">⭐ Upgrade</a>
+                    {% endif %}
                     <a href="{{ url_for('auth.logout') }}" class="nav-link nav-danger" role="listitem">Log out</a>
                 {% else %}
                     <a href="{{ url_for('auth.login') }}" class="nav-link" role="listitem">Log in</a>

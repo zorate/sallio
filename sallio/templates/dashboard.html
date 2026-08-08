@@ -32,6 +32,19 @@
     <div style="margin-top: 24px; display: flex; gap: 12px; flex-direction: column;">
         <a href="{{ url_for('main.new_sale') }}" class="btn btn-primary" style="padding: 16px; font-size: 18px;">RECORD NEW SALE</a>
         <a href="{{ url_for('main.history') }}" class="btn" style="background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color);">VIEW SALES HISTORY</a>
+        
+        {% set business = get_business(current_user.business_id) %}
+        {% if business and business.get('plan_type') == 'premium' %}
+            <div style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                <h3 style="font-size: 16px; margin-bottom: 12px;">Premium Features</h3>
+                <a href="https://wa.me/{{ config.SUPPORT_WHATSAPP_NUMBER }}" target="_blank" class="btn" style="background: #25D366; color: white; border-color: #25D366; margin-bottom: 12px;">
+                    💬 24/7 Priority Support
+                </a>
+                <button disabled class="btn" style="background: #e9ecef; color: #6c757d; border: 1px dashed #ced4da; cursor: not-allowed;">
+                    📊 Advanced Analytics (Coming Soon)
+                </button>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

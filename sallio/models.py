@@ -31,10 +31,24 @@ def create_user_and_business(owner_name, phone, password, business_name, email=N
     db = get_db()
     
     # 1. Create Business
+    # Calculate initial quota reset date (next Monday)
+    now = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    days_ahead = 0 - now.weekday()
+    if days_ahead <= 0:
+        days_ahead += 7
+    next_monday = now + datetime.timedelta(days=days_ahead)
+    next_monday = next_monday.replace(hour=0, minute=0, second=0, microsecond=0)
+
     business_doc = {
         'name': business_name,
         'email': email,
-        'address': address
+        'address': address,
+        'plan_type': 'free',
+        'receipt_generation_count': 0,
+        'receipt_quota_reset_date': next_monday,
+        'paystack_customer_code': None,
+        'paystack_subscription_code': None,
+        'subscription_status': 'active'
     }
     business_result = db.businesses.insert_one(business_doc)
     
@@ -168,3 +182,76 @@ def get_dashboard_stats(business_id):
         'week_total': 0,
         'month_total': 0
     }
+
+# --- Billing Helpers ---
+
+def get_business(business_id):
+    db = get_db()
+    return db.businesses.find_one({'_id': ObjectId(business_id)})
+
+def can_generate_receipt(business_id):
+    business = get_business(business_id)
+    if not business:
+        return False
+        
+    # Premium gets unlimited
+    if business.get('plan_type') == 'premium':
+        return True
+        
+    # Free gets 15/week
+    now = get_wat_time()
+    reset_date = business.get('receipt_quota_reset_date')
+    
+    # If past reset date, they can generate
+    if not reset_date or now >= reset_date:
+        return True
+        
+    return business.get('receipt_generation_count', 0) < 15
+
+def increment_receipt_quota(business_id):
+    db = get_db()
+    business = get_business(business_id)
+    if not business:
+        return False
+        
+    now = get_wat_time()
+    reset_date = business.get('receipt_quota_reset_date')
+    
+    # If past reset date, reset count and set new date
+    if not reset_date or now >= reset_date:
+        days_ahead = 0 - now.weekday()
+        if days_ahead <= 0:
+            days_ahead += 7
+        next_monday = now + datetime.timedelta(days=days_ahead)
+        next_monday = next_monday.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        db.businesses.update_one(
+            {'_id': ObjectId(business_id)},
+            {
+                '$set': {
+                    'receipt_generation_count': 1,
+                    'receipt_quota_reset_date': next_monday
+                }
+            }
+        )
+    else:
+        db.businesses.update_one(
+            {'_id': ObjectId(business_id)},
+            {'$inc': {'receipt_generation_count': 1}}
+        )
+    return True
+
+def upgrade_to_premium(business_id, reference):
+    db = get_db()
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {
+            '$set': {
+                'plan_type': 'premium',
+                'subscription_status': 'active',
+                'paystack_reference': reference
+            }
+        }
+    )
+    return True
+

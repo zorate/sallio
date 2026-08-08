@@ -30,4 +30,12 @@ def create_app(config_class=Config):
     from sallio.main import bp as main_bp
     app.register_blueprint(main_bp)
 
+    from sallio.billing import bp as billing_bp
+    app.register_blueprint(billing_bp)
+
+    from sallio.models import get_business
+    @app.context_processor
+    def utility_processor():
+        return dict(get_business=get_business)
+
     return app

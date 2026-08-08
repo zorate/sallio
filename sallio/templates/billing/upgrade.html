@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade to Premium - Sallio{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 24px 16px;">
+    
+    <div class="text-center" style="margin-bottom: 32px;">
+        <h1 style="color: var(--primary-color); margin-bottom: 8px;">Supercharge Your Business</h1>
+        <p style="font-size: 16px; color: var(--text-secondary);">Get unlimited access and VIP support to grow your sales.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+        
+        <!-- Premium Plan Card -->
+        <div class="glass-panel" style="border: 2px solid var(--primary-color); box-shadow: 0 12px 24px rgba(46,125,50,0.15); position: relative;">
+            <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #fff; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+                Most Popular
+            </div>
+            
+            <div class="text-center" style="margin-bottom: 24px; padding-top: 8px;">
+                <h2 style="margin: 0 0 8px;">Sallio Premium</h2>
+                <div style="font-size: 32px; font-weight: 800; color: var(--text-primary);">
+                    ₦1,500<span style="font-size: 16px; font-weight: 500; color: var(--text-secondary);">/month</span>
+                </div>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin: 0 0 32px; font-size: 15px;">
+                <li style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <span style="color: var(--primary-color); margin-right: 12px;">✔️</span> Unlimited Sales Recording
+                </li>
+                <li style="display: flex; align-items: center; margin-bottom: 12px; font-weight: 600;">
+                    <span style="color: var(--primary-color); margin-right: 12px;">✔️</span> Unlimited Receipt Generation
+                </li>
+                <li style="display: flex; align-items: center; margin-bottom: 12px; font-weight: 600;">
+                    <span style="color: var(--primary-color); margin-right: 12px;">✔️</span> 24/7 Priority WhatsApp Support
+                </li>
+                <li style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <span style="color: var(--primary-color); margin-right: 12px;">✔️</span> Advanced Business Analytics
+                </li>
+            </ul>
+
+            <button onclick="payWithPaystack()" class="btn btn-primary" style="width: 100%; font-size: 18px; padding: 16px; font-weight: 600;">
+                Upgrade Now
+            </button>
+            <p class="text-center" style="margin-top: 12px; font-size: 12px; color: var(--text-secondary);">Secured by Paystack</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+function payWithPaystack() {
+    let handler = PaystackPop.setup({
+        key: '{{ paystack_public_key }}',
+        email: '{{ user_email }}',
+        amount: 1500 * 100, // Amount is in kobo
+        currency: 'NGN',
+        ref: 'SALLIO_' + Math.floor((Math.random() * 1000000000) + 1),
+        callback: function(response) {
+            // Payment success! Verify on backend
+            Sallio.toast('Payment complete! Verifying...', 'info');
+            
+            fetch("{{ url_for('billing.verify') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ reference: response.reference })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    Sallio.success('Welcome to Premium!');
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('main.dashboard') }}";
+                    }, 2000);
+                } else {
+                    Sallio.error('Verification failed. Please contact support.');
+                }
+            })
+            .catch(err => {
+                Sallio.error('Network error during verification.');
+            });
+        },
+        onClose: function() {
+            Sallio.toast('Payment cancelled.', 'info');
+        }
+    });
+    handler.openIframe();
+}
+</script>
+{% endblock %}
