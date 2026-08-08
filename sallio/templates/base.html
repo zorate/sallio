@@ -13,19 +13,32 @@
     <meta name="apple-mobile-web-app-title" content="Sallio">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1">
 
     <!-- SEO & Meta -->
     <meta name="description" content="{% block meta_description %}Sallio — Simple sales records and digital receipts for small businesses. Sell. Record. Receipt.{% endblock %}">
     <meta name="theme-color" content="#2e7d32">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <a href="{{ url_for('main.index') }}" style="text-decoration: none;">
-                <div class="brand-title">SALLIO</div>
+    <div class="container {% if request.endpoint == 'main.index' %}landing-container{% endif %}">
+        <nav class="navbar">
+            <a href="{{ url_for('main.index') }}" class="navbar-brand">
+                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Sallio Logo" width="32" height="32" style="border-radius: 6px; object-fit: cover;">
+                SALLIO
             </a>
-        </header>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.dashboard') }}" class="nav-link">Dashboard</a>
+                    <a href="{{ url_for('main.new_sale') }}" class="nav-link">New Sale</a>
+                    <a href="{{ url_for('main.history') }}" class="nav-link">History</a>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link">Log out</a>
+                {% else %}
+                    <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">Log in</a>
+                    <a href="{{ url_for('auth.register') }}" class="nav-link btn-sm">Get Started</a>
+                {% endif %}
+            </div>
+        </nav>
         
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
