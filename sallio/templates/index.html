@@ -1,75 +1,284 @@
 {% extends 'base.html' %}
 
-{% block title %}Sallio - Sell. Record. Receipt.{% endblock %}
+{% block title %}Sallio — Sell. Record. Receipt.{% endblock %}
+{% block meta_description %}The digital sales notebook for Nigerian small businesses. Record sales, generate professional receipts, and share them via WhatsApp in seconds.{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="landing-hero" style="margin-bottom: 48px;">
-    <div class="glass-panel text-center animate-fade-in-up" style="border-left: 4px solid var(--primary-color);">
-        <h2 style="font-size: 36px; margin-bottom: 16px; line-height: 1.2;">The Digital Sales Notebook for <span style="color: var(--primary-color);">Real Businesses</span></h2>
-        <p style="font-size: 18px; margin-bottom: 32px; color: var(--text-secondary);">Small businesses sell products every day but often have no simple way to record sales and give receipts. Sallio solves this instantly.</p>
-        
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section style="
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f3d12 0%, #1b5e20 50%, #2e7d32 100%);
+    border-radius: 20px;
+    padding: 64px 32px 80px;
+    margin-bottom: 64px;
+    text-align: center;
+    color: #fff;
+">
+    <!-- Decorative blobs -->
+    <div style="position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: rgba(255,255,255,0.04); border-radius: 50%;"></div>
+    <div style="position: absolute; bottom: -40px; left: -40px; width: 160px; height: 160px; background: rgba(255,255,255,0.04); border-radius: 50%;"></div>
+
+    <div class="animate-fade-in-up" style="position: relative; z-index: 1;">
+        <span style="
+            display: inline-block;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #a5d6a7;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        ">Built for small business owners</span>
+
+        <h1 style="
+            font-size: clamp(32px, 6vw, 52px);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        ">
+            Every sale. Recorded.<br>
+            <span style="color: #81c784;">Every receipt. Delivered.</span>
+        </h1>
+
+        <p style="
+            font-size: 18px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.75);
+            max-width: 520px;
+            margin: 0 auto 40px;
+        ">
+            Stop guessing how your business is doing. Sallio is the fastest way to record a sale, generate a professional receipt, and send it to your customer via WhatsApp — in under 30 seconds.
+        </p>
+
         <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="font-size: 18px; padding: 14px 28px; width: auto; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);">Start Selling Now</a>
-            <a href="#how-it-works" class="btn" style="background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); width: auto;">See How It Works</a>
+            <a href="{{ url_for('auth.register') }}" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: #fff;
+                color: #1b5e20;
+                font-weight: 700;
+                font-size: 16px;
+                padding: 14px 28px;
+                border-radius: 50px;
+                text-decoration: none;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                transition: transform 0.2s, box-shadow 0.2s;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.25)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
+                Start for Free →
+            </a>
+            <a href="#how-it-works" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(255,255,255,0.12);
+                border: 1px solid rgba(255,255,255,0.25);
+                color: #fff;
+                font-weight: 600;
+                font-size: 16px;
+                padding: 14px 28px;
+                border-radius: 50px;
+                text-decoration: none;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+                See how it works
+            </a>
         </div>
     </div>
-    
-    <div class="animate-fade-in-up delay-100" style="text-align: center; display: none;">
-        <!-- Hidden on pure mobile, shown via flex trick or media query if implemented, but we'll keep it simple for now -->
-    </div>
-</div>
+</section>
 
-<!-- How It Works Section -->
-<div id="how-it-works" style="margin-bottom: 64px;">
-    <h3 class="text-center animate-fade-in-up delay-100" style="font-size: 28px; margin-bottom: 32px; color: var(--text-primary);">SELL &rarr; RECORD &rarr; RECEIPT &rarr; KNOW</h3>
-    
+
+<!-- ============================================================
+     PROOF / STATS BAR
+============================================================ -->
+<section class="animate-fade-in-up delay-100" style="
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 72px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    flex-wrap: wrap;
+">
+    {% set stats = [
+        ('30 sec', 'Avg. time to create a receipt'),
+        ('₦0', 'Cost to get started today'),
+        ('100%', 'Mobile-friendly')
+    ] %}
+    {% for value, label in stats %}
+    <div style="
+        flex: 1;
+        min-width: 140px;
+        padding: 28px 20px;
+        text-align: center;
+        border-right: 1px solid var(--border-color);
+    {% if loop.last %}border-right: none;{% endif %}
+    ">
+        <div style="font-size: 28px; font-weight: 800; color: var(--primary-color); margin-bottom: 4px;">{{ value }}</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">{{ label }}</div>
+    </div>
+    {% endfor %}
+</section>
+
+
+<!-- ============================================================
+     HOW IT WORKS
+============================================================ -->
+<section id="how-it-works" style="margin-bottom: 72px;">
+    <div style="text-align: center; margin-bottom: 48px;">
+        <h2 class="animate-fade-in-up" style="font-size: clamp(24px, 4vw, 36px); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px;">
+            Simple by design.
+        </h2>
+        <p class="animate-fade-in-up delay-100" style="color: var(--text-secondary); font-size: 17px; max-width: 480px; margin: 0 auto;">
+            We cut out every feature that doesn't directly help you sell and track.
+        </p>
+    </div>
+
     <div class="how-it-works-grid">
-        <!-- Step 1 -->
-        <div class="glass-panel animate-fade-in-up delay-200">
-            <div style="background: var(--primary-color); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-bottom: 16px;">1</div>
-            <h4 style="margin: 0 0 8px; font-size: 18px;">Record a Sale</h4>
-            <p style="margin: 0; font-size: 15px; color: var(--text-secondary);">Enter what you sold and the price directly. We don't force you to build a complicated product catalog first. Just sell.</p>
+        {% set steps = [
+            ('01', 'Record the sale', 'Tell Sallio what you sold and the price. That\'s it. No product catalog. No inventory setup. Just type and go.', '#e8f5e9', '#2e7d32'),
+            ('02', 'Get the receipt', 'Sallio instantly generates a clean, professional digital receipt with a unique number and your business name on it.', '#f3e5f5', '#6a1b9a'),
+            ('03', 'Send it instantly', 'Tap once to generate a receipt image and share it straight to your customer on WhatsApp. No screenshots needed.', '#e3f2fd', '#1565c0'),
+            ('04', 'Know your numbers', 'Open your dashboard to see exactly how much you\'ve made today, this week, and this month — always up to date.', '#fff3e0', '#e65100')
+        ] %}
+        {% for num, title, desc, bg, accent in steps %}
+        <div class="animate-fade-in-up delay-{{ loop.index * 100 }}" style="
+            background: {{ bg }};
+            border-radius: 16px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="
+                font-size: 56px;
+                font-weight: 900;
+                color: rgba(0,0,0,0.06);
+                position: absolute;
+                top: 8px;
+                right: 16px;
+                line-height: 1;
+                pointer-events: none;
+            ">{{ num }}</div>
+            <div style="
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                background: {{ accent }};
+                color: #fff;
+                border-radius: 10px;
+                font-weight: 700;
+                font-size: 14px;
+                margin-bottom: 16px;
+            ">{{ loop.index }}</div>
+            <h3 style="font-size: 18px; font-weight: 700; color: #212529; margin-bottom: 10px;">{{ title }}</h3>
+            <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0;">{{ desc }}</p>
         </div>
-        
-        <!-- Step 2 -->
-        <div class="glass-panel animate-fade-in-up delay-300">
-            <div style="background: var(--primary-color); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-bottom: 16px;">2</div>
-            <h4 style="margin: 0 0 8px; font-size: 18px;">Generate Receipt</h4>
-            <p style="margin: 0; font-size: 15px; color: var(--text-secondary);">Sallio instantly creates a professional, uniquely numbered digital receipt displaying your business name and sale details.</p>
-        </div>
-        
-        <!-- Step 3 -->
-        <div class="glass-panel animate-fade-in-up delay-100">
-            <div style="background: var(--primary-color); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-bottom: 16px;">3</div>
-            <h4 style="margin: 0 0 8px; font-size: 18px;">Send Customer Proof</h4>
-            <p style="margin: 0; font-size: 15px; color: var(--text-secondary);">Click one button to generate a high-quality image of the receipt and share it directly to your customer via WhatsApp.</p>
-        </div>
-        
-        <!-- Step 4 -->
-        <div class="glass-panel animate-fade-in-up delay-200">
-            <div style="background: var(--primary-color); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; margin-bottom: 16px;">4</div>
-            <h4 style="margin: 0 0 8px; font-size: 18px;">Know Your Numbers</h4>
-            <p style="margin: 0; font-size: 15px; color: var(--text-secondary);">Stop guessing. Check your dashboard to instantly see exactly how much you've made today, this week, and this month.</p>
+        {% endfor %}
+    </div>
+</section>
+
+
+<!-- ============================================================
+     WHY SALLIO
+============================================================ -->
+<section style="
+    background: linear-gradient(135deg, #f9fffe 0%, #f0f9f1 100%);
+    border: 1px solid #c8e6c9;
+    border-radius: 20px;
+    padding: 48px 32px;
+    margin-bottom: 72px;
+">
+    <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <h2 class="animate-fade-in-up" style="font-size: 28px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.5px;">
+            Built for Nigerian shop owners.<br>
+            <span style="color: var(--primary-color);">Not for accountants.</span>
+        </h2>
+        <p class="animate-fade-in-up delay-100" style="color: var(--text-secondary); font-size: 16px; line-height: 1.7; margin-bottom: 32px;">
+            Most POS systems want you to upload 500 products, configure tax rates, and read a manual before you can make your first sale. <strong>Sallio is different.</strong> Open the app, type what you sold, and you're done. Your receipt is ready.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left;">
+            {% set features = [
+                ('✅', 'No product catalog required'),
+                ('✅', 'WhatsApp receipt sharing'),
+                ('✅', 'Works on any phone'),
+                ('✅', 'Real-time sales dashboard'),
+                ('✅', 'Unique receipt numbers'),
+                ('✅', 'Free to get started')
+            ] %}
+            {% for icon, feat in features %}
+            <div class="animate-fade-in-up delay-100" style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: #fff;
+                border-radius: 10px;
+                padding: 12px 16px;
+                border: 1px solid #e0f2e9;
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-primary);
+            ">{{ icon }} {{ feat }}</div>
+            {% endfor %}
         </div>
     </div>
-</div>
+</section>
 
-<!-- About Us / Philosophy Section -->
-<div class="glass-panel animate-fade-in-up delay-300" style="margin-bottom: 64px; text-align: center; background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,250,240,0.9));">
-    <h3 style="font-size: 24px; color: var(--text-primary); margin-bottom: 16px;">Built for the Real World</h3>
-    <p style="font-size: 16px; color: var(--text-secondary); max-width: 600px; margin: 0 auto 24px; line-height: 1.6;">
-        Most Point-of-Sale (POS) systems are too complex. They require you to upload hundreds of products, track inventory you don't have, and learn complicated accounting features. 
-        <br><br>
-        <strong>Sallio is different.</strong> We believe a digital sales notebook should be as fast and flexible as writing in a physical book, but with the power of professional receipts and instant profit calculation.
-    </p>
-</div>
 
-<!-- Final CTA -->
-<div class="text-center animate-fade-in-up delay-100" style="margin-bottom: 48px;">
-    <h3 style="font-size: 22px; margin-bottom: 24px;">Ready to throw away the paper notebook?</h3>
-    <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="font-size: 18px; padding: 14px 32px; width: auto;">Create Free Account</a>
-    <p style="margin-top: 16px; font-size: 14px; font-style: italic; color: var(--text-secondary);">"Know exactly where your business stands."</p>
-</div>
+<!-- ============================================================
+     FINAL CTA
+============================================================ -->
+<section style="
+    text-align: center;
+    background: linear-gradient(135deg, #0f3d12 0%, #1b5e20 100%);
+    border-radius: 20px;
+    padding: 64px 32px;
+    margin-bottom: 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+">
+    <div style="position: absolute; top: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.04); border-radius: 50%;"></div>
+    <div style="position: absolute; bottom: -30px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.04); border-radius: 50%;"></div>
+
+    <div class="animate-fade-in-up" style="position: relative; z-index: 1;">
+        <h2 style="font-size: clamp(24px, 4vw, 40px); font-weight: 800; margin-bottom: 16px; letter-spacing: -0.5px;">
+            Ready to throw away<br>the paper notebook?
+        </h2>
+        <p style="color: rgba(255,255,255,0.7); font-size: 17px; margin-bottom: 40px;">
+            Join other business owners who track every naira with Sallio.
+        </p>
+        <a href="{{ url_for('auth.register') }}" style="
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: #1b5e20;
+            font-weight: 700;
+            font-size: 17px;
+            padding: 16px 36px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            Create Free Account →
+        </a>
+        <p style="margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.4);">No credit card required. Start selling in minutes.</p>
+    </div>
+</section>
 
 {% endblock %}

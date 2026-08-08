@@ -149,7 +149,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 14px 0;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--border-color);
 }
@@ -157,41 +157,60 @@ main {
   display: flex;
   align-items: center;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 24px;
+  font-weight: 800;
+  font-size: 20px;
   color: var(--primary-color);
   letter-spacing: -0.5px;
+  gap: 8px;
 }
 .navbar-brand img {
   width: 32px;
   height: 32px;
-  margin-right: 8px;
-  border-radius: 6px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .nav-links {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
 }
 .nav-link {
   text-decoration: none;
-  color: var(--text-secondary);
   font-weight: 500;
-  font-size: 14px;
-  transition: color 0.2s;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  background: #fff;
+  transition: all 0.18s ease;
+  white-space: nowrap;
 }
 .nav-link:hover {
+  border-color: var(--primary-color);
   color: var(--primary-color);
+  background: #f0f9f1;
 }
-.nav-link.btn-sm {
-  padding: 6px 12px;
-  border: 1px solid var(--primary-color);
-  border-radius: 6px;
-  color: var(--primary-color);
-}
-.nav-link.btn-sm:hover {
+.nav-link.nav-primary {
   background: var(--primary-color);
   color: #fff;
+  border-color: var(--primary-color);
+  font-weight: 600;
+}
+.nav-link.nav-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: #fff;
+}
+.nav-link.nav-danger {
+  color: #c0392b;
+  border-color: #fadadd;
+  background: #fff9f9;
+}
+.nav-link.nav-danger:hover {
+  background: #fdecea;
+  border-color: #e74c3c;
 }
 
 /* Animations */
@@ -235,5 +254,26 @@ main {
   }
   .how-it-works-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .brand-text {
+    display: none;
+  }
+  .nav-links {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .nav-link {
+    font-size: 13px;
+  }
+  .landing-hero h2 {
+    font-size: 28px !important;
+  }
+  .landing-hero p {
+    font-size: 15px !important;
   }
 }

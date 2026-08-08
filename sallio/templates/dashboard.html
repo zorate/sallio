@@ -4,9 +4,8 @@
 
 {% block content %}
 <div class="glass-panel">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div style="margin-bottom: 24px;">
         <h2 style="margin: 0; color: var(--primary-color);">Hello, {{ current_user.owner_name }}</h2>
-        <a href="{{ url_for('auth.logout') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">Logout</a>
     </div>
 
     <p style="color: var(--text-secondary); margin-bottom: 24px;">Welcome to your business dashboard.</p>
