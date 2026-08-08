@@ -60,6 +60,10 @@ def verify_user(phone, password):
 import datetime
 from pymongo import ReturnDocument
 
+def get_wat_time():
+    """Returns current Nigerian Time (WAT, UTC+1) as a naive datetime"""
+    return datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+
 def generate_receipt_number():
     db = get_db()
     # Find the counter document for receipts, increment sequence value by 1
@@ -71,7 +75,7 @@ def generate_receipt_number():
         return_document=ReturnDocument.AFTER
     )
     # Generate receipt number in format: RCPT-YYYYMMDD-XXXX
-    date_str = datetime.datetime.now().strftime('%Y%m%d')
+    date_str = get_wat_time().strftime('%Y%m%d')
     # Use sequence_value + 1000 to start at a nice number
     seq = counter.get('sequence_value', 1) + 1000
     return f"RCPT-{date_str}-{seq}"
@@ -110,7 +114,7 @@ def create_sale(business_id, items, payment_method, customer_name=None, customer
     sale_doc = {
         'business_id': ObjectId(business_id),
         'receipt_number': receipt_number,
-        'date': datetime.datetime.utcnow(),
+        'date': get_wat_time(),
         'items': validated_items,
         'subtotal': subtotal,
         'total': subtotal, # MVP doesn't have discounts yet
@@ -137,7 +141,7 @@ def get_sales(business_id, limit=50):
 
 def get_dashboard_stats(business_id):
     db = get_db()
-    now = datetime.datetime.utcnow()
+    now = get_wat_time()
     
     # Calculate start of day, week, month
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
