@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - Sallio{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 400px; margin: 0 auto;">
+    <h2 class="text-center" style="color: var(--primary-color);">Welcome Back</h2>
+    <p class="text-center">Log in to your business</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding: 12px; margin-bottom: 16px; border-radius: 8px; background-color: {% if category == 'error' %}#fdecea{% else %}#e8f5e9{% endif %}; color: {% if category == 'error' %}#d32f2f{% else %}#2e7d32{% endif %}; font-size: 14px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        <div style="margin-bottom: 16px;">
+            <label for="phone" style="display: block; margin-bottom: 8px; font-weight: 500;">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px;">
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <label for="password" style="display: block; margin-bottom: 8px; font-weight: 500;">Password</label>
+            <input type="password" id="password" name="password" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Log In</button>
+    </form>
+    
+    <div class="text-center" style="margin-top: 24px; font-size: 14px;">
+        Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Sign up</a>
+    </div>
+</div>
+{% endblock %}

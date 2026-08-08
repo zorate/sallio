@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Sales History - Sallio{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 480px; margin: 0 auto; padding: 16px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 20px;">Sales History</h2>
+        <a href="{{ url_for('main.dashboard') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">&larr; Dashboard</a>
+    </div>
+
+    {% if sales %}
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for sale in sales %}
+            <a href="{{ url_for('main.receipt', receipt_number=sale.receipt_number) }}" style="text-decoration: none; color: inherit;">
+                <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; transition: transform 0.1s ease, box-shadow 0.1s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 500; color: var(--text-primary);">{{ sale.receipt_number }}</span>
+                        <span style="font-weight: 600; color: var(--primary-color);">₦{{ "{:,.2f}".format(sale.total) }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary);">
+                        <span>{{ sale.date.strftime('%d %b, %I:%M %p') }}</span>
+                        <span>{{ sale['items']|length }} item(s)</span>
+                    </div>
+
+                    {% if sale.customer_name %}
+                    <div style="margin-top: 8px; font-size: 13px; color: var(--text-secondary); border-top: 1px solid #f0f0f0; padding-top: 8px;">
+                        Customer: {{ sale.customer_name }}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center" style="padding: 48px 0; color: var(--text-secondary);">
+            <svg style="width: 48px; height: 48px; margin-bottom: 16px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            <h3 style="margin-bottom: 8px; color: var(--text-primary);">No sales yet</h3>
+            <p style="font-size: 14px; margin-bottom: 24px;">Your first sale starts here.<br>Record a sale and Sallio will keep track of it for you.</p>
+            <a href="{{ url_for('main.new_sale') }}" class="btn btn-primary" style="display: inline-block; width: auto; padding: 10px 24px;">Record First Sale</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

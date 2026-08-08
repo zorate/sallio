@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Sallio{% endblock %}</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/favicon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="description" content="Sell. Record. Receipt.">
+    <meta name="theme-color" content="#2e7d32">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand-title">SALLIO</div>
+        </header>
+        
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

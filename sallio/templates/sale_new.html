@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}New Sale - Sallio{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="max-width: 480px; margin: 0 auto; padding: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 20px;">New Sale</h2>
+        <a href="{{ url_for('main.dashboard') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">Cancel</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding: 12px; margin-bottom: 16px; border-radius: 8px; background-color: {% if category == 'error' %}#fdecea{% else %}#e8f5e9{% endif %}; color: {% if category == 'error' %}#d32f2f{% else %}#2e7d32{% endif %}; font-size: 14px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('main.new_sale') }}" id="sale-form">
+        
+        <div id="items-container">
+            <!-- First Item -->
+            <div class="item-row" style="background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Item Name</label>
+                    <input type="text" name="item_name[]" required placeholder="e.g. Blue Sneakers" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Qty</label>
+                        <input type="number" name="quantity[]" value="1" min="1" required class="qty-input" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Price (₦)</label>
+                        <input type="number" name="price[]" min="0" step="0.01" required class="price-input" placeholder="0.00" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" id="add-item-btn" style="width: 100%; padding: 12px; background: transparent; border: 1px dashed var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: 500; cursor: pointer; margin-bottom: 24px;">+ Add Another Item</button>
+
+        <div style="background: var(--bg-color); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 18px;">
+                <span>Total:</span>
+                <span>₦<span id="grand-total">0.00</span></span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Payment Method</label>
+            <select name="payment_method" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; background: white;">
+                <option value="Cash">Cash</option>
+                <option value="Transfer">Transfer</option>
+                <option value="POS">POS</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Customer Info (Optional)</label>
+            <input type="text" name="customer_name" placeholder="Name" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; margin-bottom: 8px;">
+            <input type="tel" name="customer_phone" placeholder="Phone Number" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="font-size: 18px; padding: 16px;">Record Sale</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const itemsContainer = document.getElementById('items-container');
+        const addItemBtn = document.getElementById('add-item-btn');
+        const grandTotalEl = document.getElementById('grand-total');
+
+        function calculateTotal() {
+            let total = 0;
+            const rows = document.querySelectorAll('.item-row');
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                total += (qty * price);
+            });
+            grandTotalEl.textContent = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        itemsContainer.addEventListener('input', function(e) {
+            if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
+                calculateTotal();
+            }
+        });
+
+        addItemBtn.addEventListener('click', function() {
+            const newRow = document.createElement('div');
+            newRow.className = 'item-row';
+            newRow.style.cssText = 'background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; position: relative;';
+            newRow.innerHTML = `
+                <button type="button" class="remove-btn" style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: #dc3545; font-size: 20px; cursor: pointer; padding: 4px;">&times;</button>
+                <div style="margin-bottom: 12px; padding-right: 24px;">
+                    <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Item Name</label>
+                    <input type="text" name="item_name[]" required placeholder="e.g. Blue Sneakers" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Qty</label>
+                        <input type="number" name="quantity[]" value="1" min="1" required class="qty-input" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Price (₦)</label>
+                        <input type="number" name="price[]" min="0" step="0.01" required class="price-input" placeholder="0.00" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                    </div>
+                </div>
+            `;
+            itemsContainer.appendChild(newRow);
+            
+            newRow.querySelector('.remove-btn').addEventListener('click', function() {
+                newRow.remove();
+                calculateTotal();
+            });
+        });
+    });
+</script>
+{% endblock %}

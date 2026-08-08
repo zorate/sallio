@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found - Sallio{% endblock %}
+{% block content %}
+<div class="glass-panel text-center" style="max-width: 480px; margin: 0 auto; padding: 48px 24px;">
+    <div style="font-size: 48px; font-weight: bold; color: var(--primary-color); margin-bottom: 16px;">404</div>
+    <h2 style="margin-bottom: 16px; color: var(--text-primary);">Page Not Found</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 32px;">We couldn't find the page you're looking for. It may have been moved or doesn't exist.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Return Home</a>
+</div>
+{% endblock %}

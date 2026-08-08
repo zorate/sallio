@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sallio{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; color: var(--primary-color);">Hello, {{ current_user.owner_name }}</h2>
+        <a href="{{ url_for('auth.logout') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">Logout</a>
+    </div>
+
+    <p style="color: var(--text-secondary); margin-bottom: 24px;">Welcome to your business dashboard.</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Today's Sales</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--primary-color);">₦{{ "{:,.2f}".format(stats.today_total) }}</div>
+        </div>
+        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">This Week</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">₦{{ "{:,.2f}".format(stats.week_total) }}</div>
+        </div>
+        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">This Month</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">₦{{ "{:,.2f}".format(stats.month_total) }}</div>
+        </div>
+        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Total Sales</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">{{ stats.total_sales_count }}</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 24px; display: flex; gap: 12px; flex-direction: column;">
+        <a href="{{ url_for('main.new_sale') }}" class="btn btn-primary" style="padding: 16px; font-size: 18px;">RECORD NEW SALE</a>
+        <a href="{{ url_for('main.history') }}" class="btn" style="background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color);">VIEW SALES HISTORY</a>
+    </div>
+</div>
+{% endblock %}
