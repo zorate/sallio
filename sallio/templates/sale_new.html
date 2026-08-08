@@ -5,43 +5,55 @@
 {% block content %}
 <div class="glass-panel" style="max-width: 480px; margin: 0 auto; padding: 16px;">
     <div style="margin-bottom: 24px;">
-        <h2 style="margin: 0; font-size: 20px;">New Sale</h2>
+        <h1 style="margin: 0; font-size: 20px; font-weight: 700;">New Sale</h1>
     </div>
 
-    <form method="POST" action="{{ url_for('main.new_sale') }}" id="sale-form">
+    <form method="POST" action="{{ url_for('main.new_sale') }}" id="sale-form" novalidate>
         
         <div id="items-container">
-            <!-- First Item -->
+            <!-- First Item — cannot be removed -->
             <div class="item-row" style="background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
-                <div style="margin-bottom: 12px;">
-                    <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Item Name</label>
-                    <input type="text" name="item_name[]" required placeholder="e.g. Blue Sneakers" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                <div class="form-field">
+                    <label>Item Name</label>
+                    <input class="form-input" type="text" name="item_name[]" required
+                           placeholder="e.g. Blue Sneakers">
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <div style="flex: 1;">
-                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Qty</label>
-                        <input type="number" name="quantity[]" value="1" min="1" required class="qty-input" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                        <div class="form-field" style="margin-bottom: 0;">
+                            <label>Qty</label>
+                            <input class="form-input qty-input" type="number"
+                                   name="quantity[]" value="1" min="1" required
+                                   inputmode="numeric">
+                        </div>
                     </div>
                     <div style="flex: 2;">
-                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Price (₦)</label>
-                        <input type="number" name="price[]" min="0" step="0.01" required class="price-input" placeholder="0.00" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+                        <div class="form-field" style="margin-bottom: 0;">
+                            <label>Price (₦)</label>
+                            <input class="form-input price-input" type="number"
+                                   name="price[]" min="0" step="0.01" required
+                                   placeholder="0.00" inputmode="decimal">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <button type="button" id="add-item-btn" style="width: 100%; padding: 12px; background: transparent; border: 1px dashed var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: 500; cursor: pointer; margin-bottom: 24px;">+ Add Another Item</button>
+        <button type="button" id="add-item-btn"
+                style="width: 100%; padding: 12px; background: transparent; border: 1px dashed var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: 500; cursor: pointer; margin-bottom: 24px; font-size: 15px;">
+            + Add Another Item
+        </button>
 
-        <div style="background: var(--bg-color); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 18px;">
+        <div style="background: var(--bg-color); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 18px;">
                 <span>Total:</span>
-                <span>₦<span id="grand-total">0.00</span></span>
+                <span style="color: var(--primary-color);">₦<span id="grand-total">0.00</span></span>
             </div>
         </div>
 
-        <div style="margin-bottom: 16px;">
-            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Payment Method</label>
-            <select name="payment_method" required style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; background: white;">
+        <div class="form-field">
+            <label for="payment_method">Payment Method</label>
+            <select id="payment_method" name="payment_method" required class="form-input">
                 <option value="Cash">Cash</option>
                 <option value="Transfer">Transfer</option>
                 <option value="POS">POS</option>
@@ -50,66 +62,154 @@
         </div>
 
         <div style="margin-bottom: 24px;">
-            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Customer Info (Optional)</label>
-            <input type="text" name="customer_name" placeholder="Name" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; margin-bottom: 8px;">
-            <input type="tel" name="customer_phone" placeholder="Phone Number" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
+            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary);">
+                Customer Info <span style="font-weight: 400;">(Optional)</span>
+            </label>
+            <input class="form-input" type="text" name="customer_name"
+                   placeholder="Customer name" style="margin-bottom: 8px;">
+            <input class="form-input" type="tel" name="customer_phone"
+                   placeholder="Phone number" inputmode="tel">
         </div>
 
-        <button type="submit" class="btn btn-primary" style="font-size: 18px; padding: 16px;">Record Sale</button>
+        <!-- Validation error area -->
+        <div id="form-error" style="display:none; margin-bottom: 16px; padding: 12px 16px; background: #fdecea; color: #c62828; border-radius: 8px; font-size: 14px;" role="alert"></div>
+
+        <button type="submit" id="sale-submit-btn" class="btn btn-primary"
+                style="font-size: 18px; padding: 16px;">
+            Record Sale
+        </button>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const itemsContainer = document.getElementById('items-container');
-        const addItemBtn = document.getElementById('add-item-btn');
-        const grandTotalEl = document.getElementById('grand-total');
+document.addEventListener('DOMContentLoaded', function () {
+    const itemsContainer = document.getElementById('items-container');
+    const addItemBtn     = document.getElementById('add-item-btn');
+    const grandTotalEl   = document.getElementById('grand-total');
+    const formError      = document.getElementById('form-error');
+    const saleForm       = document.getElementById('sale-form');
 
-        function calculateTotal() {
-            let total = 0;
-            const rows = document.querySelectorAll('.item-row');
-            rows.forEach(row => {
-                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
-                const price = parseFloat(row.querySelector('.price-input').value) || 0;
-                total += (qty * price);
-            });
-            grandTotalEl.textContent = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    // ── Total calculation ─────────────────────────────────────
+    function calculateTotal() {
+        let total = 0;
+        document.querySelectorAll('.item-row').forEach(row => {
+            const qty   = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            total += qty * price;
+        });
+        grandTotalEl.textContent = total.toLocaleString('en-NG', {
+            minimumFractionDigits: 2, maximumFractionDigits: 2
+        });
+    }
+
+    itemsContainer.addEventListener('input', function (e) {
+        if (e.target.classList.contains('qty-input') ||
+            e.target.classList.contains('price-input')) {
+            calculateTotal();
         }
+    });
 
-        itemsContainer.addEventListener('input', function(e) {
-            if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
-                calculateTotal();
+    // ── Add item row ──────────────────────────────────────────
+    function makeItemRow() {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.style.cssText = 'background:#fff; padding:12px; border:1px solid var(--border-color); border-radius:8px; margin-bottom:12px; position:relative;';
+        row.innerHTML = `
+            <button type="button" class="remove-btn"
+                aria-label="Remove item"
+                style="position:absolute; top:8px; right:8px; background:none; border:none; color:#dc3545; font-size:22px; cursor:pointer; padding:2px 6px; line-height:1;">
+                &times;
+            </button>
+            <div class="form-field" style="padding-right:28px;">
+                <label>Item Name</label>
+                <input class="form-input" type="text" name="item_name[]" required
+                       placeholder="e.g. Blue Sneakers">
+            </div>
+            <div style="display:flex; gap:12px;">
+                <div style="flex:1;">
+                    <div class="form-field" style="margin-bottom:0;">
+                        <label>Qty</label>
+                        <input class="form-input qty-input" type="number"
+                               name="quantity[]" value="1" min="1" required inputmode="numeric">
+                    </div>
+                </div>
+                <div style="flex:2;">
+                    <div class="form-field" style="margin-bottom:0;">
+                        <label>Price (₦)</label>
+                        <input class="form-input price-input" type="number"
+                               name="price[]" min="0" step="0.01" required
+                               placeholder="0.00" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
+        `;
+        row.querySelector('.remove-btn').addEventListener('click', function () {
+            row.remove();
+            calculateTotal();
+        });
+        return row;
+    }
+
+    addItemBtn.addEventListener('click', function () {
+        itemsContainer.appendChild(makeItemRow());
+    });
+
+    // ── Client-side validation + form guard ───────────────────
+    let submitted = false;
+
+    saleForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        formError.style.display = 'none';
+
+        // Validate each item row
+        let valid = true;
+        let errorMsg = '';
+        document.querySelectorAll('.item-row').forEach((row, idx) => {
+            const nameEl  = row.querySelector('[name="item_name[]"]');
+            const priceEl = row.querySelector('.price-input');
+            const qtyEl   = row.querySelector('.qty-input');
+            const name  = nameEl ? nameEl.value.trim() : '';
+            const price = parseFloat(priceEl ? priceEl.value : 0);
+            const qty   = parseInt(qtyEl ? qtyEl.value : 0);
+
+            if (!name) {
+                valid = false;
+                errorMsg = `Item ${idx + 1}: Please enter an item name.`;
+                if (nameEl) nameEl.focus();
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                valid = false;
+                errorMsg = `Item ${idx + 1}: Price must be ₦0 or more.`;
+                if (priceEl) priceEl.focus();
+                return;
+            }
+            if (isNaN(qty) || qty < 1) {
+                valid = false;
+                errorMsg = `Item ${idx + 1}: Quantity must be at least 1.`;
+                if (qtyEl) qtyEl.focus();
+                return;
             }
         });
 
-        addItemBtn.addEventListener('click', function() {
-            const newRow = document.createElement('div');
-            newRow.className = 'item-row';
-            newRow.style.cssText = 'background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px; position: relative;';
-            newRow.innerHTML = `
-                <button type="button" class="remove-btn" style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: #dc3545; font-size: 20px; cursor: pointer; padding: 4px;">&times;</button>
-                <div style="margin-bottom: 12px; padding-right: 24px;">
-                    <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Item Name</label>
-                    <input type="text" name="item_name[]" required placeholder="e.g. Blue Sneakers" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
-                </div>
-                <div style="display: flex; gap: 12px;">
-                    <div style="flex: 1;">
-                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Qty</label>
-                        <input type="number" name="quantity[]" value="1" min="1" required class="qty-input" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
-                    </div>
-                    <div style="flex: 2;">
-                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Price (₦)</label>
-                        <input type="number" name="price[]" min="0" step="0.01" required class="price-input" placeholder="0.00" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px;">
-                    </div>
-                </div>
-            `;
-            itemsContainer.appendChild(newRow);
-            
-            newRow.querySelector('.remove-btn').addEventListener('click', function() {
-                newRow.remove();
-                calculateTotal();
-            });
-        });
+        if (!valid) {
+            formError.textContent = errorMsg;
+            formError.style.display = 'block';
+            formError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+        }
+
+        // Guard against double submission
+        if (submitted) return;
+        submitted = true;
+
+        const submitBtn = document.getElementById('sale-submit-btn');
+        Sallio.buttonLoading(submitBtn, 'Recording sale...');
+
+        saleForm.submit();
     });
+});
 </script>
 {% endblock %}
