@@ -2,22 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>{% block title %}Sallio{% endblock %}</title>
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/favicon.jpg') }}">
+
+    <!-- Favicons & Icons -->
+    <link rel="icon" type="image/jpeg" sizes="32x32" href="{{ url_for('static', filename='img/favicon.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.jpg') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Sallio">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <meta name="description" content="Sell. Record. Receipt.">
+
+    <!-- SEO & Meta -->
+    <meta name="description" content="{% block meta_description %}Sallio — Simple sales records and digital receipts for small businesses. Sell. Record. Receipt.{% endblock %}">
     <meta name="theme-color" content="#2e7d32">
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="brand-title">SALLIO</div>
+            <a href="{{ url_for('main.index') }}" style="text-decoration: none;">
+                <div class="brand-title">SALLIO</div>
+            </a>
         </header>
         
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <main>
             {% block content %}{% endblock %}
         </main>
+
+        <footer style="text-align: center; padding: 24px 0 12px; font-size: 12px; color: var(--text-secondary);">
+            &copy; {{ now.year if now is defined else 2026 }} Sallio &middot; Every sale. Recorded.
+        </footer>
     </div>
 </body>
 </html>

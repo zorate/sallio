@@ -9,16 +9,6 @@
         <a href="{{ url_for('main.dashboard') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">Cancel</a>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div style="padding: 12px; margin-bottom: 16px; border-radius: 8px; background-color: {% if category == 'error' %}#fdecea{% else %}#e8f5e9{% endif %}; color: {% if category == 'error' %}#d32f2f{% else %}#2e7d32{% endif %}; font-size: 14px;">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
     <form method="POST" action="{{ url_for('main.new_sale') }}" id="sale-form">
         
         <div id="items-container">

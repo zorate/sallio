@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
+from bson.objectid import ObjectId
 from sallio.main import bp
 from sallio.models import create_sale
 
@@ -58,9 +59,14 @@ def receipt(receipt_number):
     if not sale:
         flash('Receipt not found or access denied.', 'error')
         return redirect(url_for('main.dashboard'))
+    
+    # Fetch business name from DB
+    from sallio.db import get_db
+    db = get_db()
+    business = db.businesses.find_one({'_id': ObjectId(current_user.business_id)})
+    business_name = business['name'] if business else 'Our Shop'
         
     # Generate WhatsApp message text
-    business_name = getattr(current_user, 'business_name', 'Our Shop') # Should ideally fetch business details
     items_text = ", ".join([f"{item['quantity']}x {item['name']}" for item in sale['items']])
     wa_msg = f"Receipt from {business_name}%0A" \
              f"Receipt: {sale['receipt_number']}%0A" \
@@ -68,7 +74,7 @@ def receipt(receipt_number):
              f"Items: {items_text}%0A" \
              f"Thank you for your business!"
              
-    return render_template('receipt.html', sale=sale, wa_msg=wa_msg)
+    return render_template('receipt.html', sale=sale, wa_msg=wa_msg, business_name=business_name)
 
 @bp.route('/history')
 @login_required
