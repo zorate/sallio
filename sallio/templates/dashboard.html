@@ -9,6 +9,19 @@
     </div>
 
     <p style="color: var(--text-secondary); margin-bottom: 24px;">Welcome to your business dashboard.</p>
+
+    {% if not business.signature_file_id %}
+    <div style="background: #fff8e1; border: 1px solid #ffecb3; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 200px;">
+            <div style="font-size: 24px;">✍️</div>
+            <div>
+                <h4 style="margin: 0; color: #b78103; font-size: 15px; margin-bottom: 2px;">Build Trust</h4>
+                <p style="margin: 0; color: #8f6a00; font-size: 13px;">Add a signature to your receipts.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('settings.index') }}" class="btn btn-sm" style="background: #ffc107; color: #000; border: none; padding: 8px 16px; white-space: nowrap;">Add Signature</a>
+    </div>
+    {% endif %}
     
     <div class="dashboard-grid">
         <div class="stat-card">

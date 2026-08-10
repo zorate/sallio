@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Business Settings - Sallio{% endblock %}
+
+{% block content %}
+<div style="max-width: 760px; margin: 0 auto;">
+
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Business Settings</h1>
+        <p style="color: var(--text-secondary); margin: 0;">Manage your business profile and receipt information.</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 1 — BUSINESS IDENTITY + HEAD OFFICE
+    ══════════════════════════════════════════════ -->
+    <div class="settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">🏢</div>
+            <div>
+                <h2 class="settings-card-title">Business Identity</h2>
+                <p class="settings-card-sub">Shown on all your receipts</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('settings.index') }}">
+            <input type="hidden" name="form_type" value="profile">
+
+            <div class="settings-field-group">
+                <label class="settings-label">Business Name <span class="settings-readonly-badge">Read-only</span></label>
+                <input class="form-input" type="text" value="{{ business.name }}" disabled>
+                <span class="settings-hint">To change your business name, contact support.</span>
+            </div>
+
+            <div class="settings-field-group">
+                <label class="settings-label" for="bio">Business Bio <span class="settings-char-count" id="bio-count">0/300</span></label>
+                <textarea class="form-input" id="bio" name="bio" rows="3" maxlength="300"
+                          placeholder="What does your business do? e.g. Dealers & Suppliers of Building Materials, Electrical and Plumbing supplies."
+                >{{ business.bio or '' }}</textarea>
+                <span class="settings-hint">Displayed beneath your business name on receipts.</span>
+            </div>
+
+            <div class="settings-field-group">
+                <label class="settings-label" for="display_phone">Business Phone Number</label>
+                <input class="form-input" type="tel" id="display_phone" name="display_phone"
+                       inputmode="tel" placeholder="e.g. 08012345678"
+                       value="{{ business.display_phone or '' }}">
+                <span class="settings-hint">This phone number appears on your receipts.</span>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <h3 class="settings-section-sub">📍 Head Office</h3>
+
+            <div class="settings-two-col">
+                <div class="settings-field-group">
+                    <label class="settings-label" for="ho_address">Address</label>
+                    <input class="form-input" type="text" id="ho_address" name="ho_address"
+                           placeholder="e.g. 20 Mission Road"
+                           value="{{ business.head_office.address if business.head_office else '' }}">
+                </div>
+                <div class="settings-field-group">
+                    <label class="settings-label" for="ho_city">City / Area</label>
+                    <input class="form-input" type="text" id="ho_city" name="ho_city"
+                           placeholder="e.g. Rumuola"
+                           value="{{ business.head_office.city if business.head_office else '' }}">
+                </div>
+                <div class="settings-field-group">
+                    <label class="settings-label" for="ho_state">State</label>
+                    <input class="form-input" type="text" id="ho_state" name="ho_state"
+                           placeholder="e.g. Rivers State"
+                           value="{{ business.head_office.state if business.head_office else '' }}">
+                </div>
+                <div class="settings-field-group">
+                    <label class="settings-label" for="ho_phone">Office Phone</label>
+                    <input class="form-input" type="tel" id="ho_phone" name="ho_phone"
+                           inputmode="tel" placeholder="e.g. 08012345678"
+                           value="{{ business.head_office.phone if business.head_office else '' }}">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 8px; width: auto; padding: 12px 32px;">
+                Save Profile
+            </button>
+        </form>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 2 — LOGO (Premium Only)
+    ══════════════════════════════════════════════ -->
+    <div class="settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">🖼️</div>
+            <div>
+                <h2 class="settings-card-title">Business Logo
+                    {% if business.plan_type != 'premium' %}
+                        <span class="premium-badge">⭐ Premium</span>
+                    {% endif %}
+                </h2>
+                <p class="settings-card-sub">Your logo appears at the top of every receipt</p>
+            </div>
+        </div>
+
+        {% if business.plan_type == 'premium' %}
+            <div class="logo-preview-area">
+                {% if business.logo_file_id %}
+                    <img src="{{ url_for('uploads.serve', file_id=business.logo_file_id) }}"
+                         alt="Business Logo" class="logo-preview-img">
+                    <form method="POST" action="{{ url_for('settings.remove_logo') }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm" style="background:#fdecea; color:#c62828; border:1px solid #fdecea; margin-left:12px; width:auto; padding:6px 14px; font-size:13px;">
+                            Remove Logo
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="logo-placeholder">No logo uploaded yet</div>
+                {% endif %}
+            </div>
+
+            <form method="POST" action="{{ url_for('settings.upload_logo') }}" enctype="multipart/form-data"
+                  id="logo-upload-form">
+                <div class="settings-field-group" style="margin-top:16px;">
+                    <label class="settings-label" for="logo">Upload New Logo</label>
+                    <input type="file" id="logo" name="logo" accept="image/jpeg,image/png,image/webp"
+                           class="file-input" onchange="previewLogo(this)">
+                    <span class="settings-hint">JPEG, PNG or WebP · Max 2 MB</span>
+                </div>
+                <div id="logo-preview-new" style="display:none; margin-bottom:12px;">
+                    <img id="logo-preview-img-new" src="" alt="Preview" class="logo-preview-img">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:auto; padding:10px 28px;">
+                    Upload Logo
+                </button>
+            </form>
+        {% else %}
+            <div class="premium-locked-panel">
+                <p>Upload your business logo to make receipts look truly professional.</p>
+                <a href="{{ url_for('billing.upgrade') }}" class="btn btn-primary" style="width:auto; padding:10px 24px; font-size:14px;">
+                    ⭐ Upgrade to Premium
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 2.5 — SIGNATURE PAD (Free & Premium)
+    ══════════════════════════════════════════════ -->
+    <div class="settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">✍️</div>
+            <div>
+                <h2 class="settings-card-title">Authorised Signature</h2>
+                <p class="settings-card-sub">Draw your signature to be printed on all receipts.</p>
+            </div>
+        </div>
+
+        <div class="logo-preview-area">
+            {% if business.signature_file_id %}
+                <img src="{{ url_for('uploads.serve', file_id=business.signature_file_id) }}"
+                     alt="Business Signature" class="logo-preview-img" style="background:transparent; object-fit:contain; border:none;">
+                <form method="POST" action="{{ url_for('settings.remove_signature') }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm" style="background:#fdecea; color:#c62828; border:1px solid #fdecea; margin-left:12px; width:auto; padding:6px 14px; font-size:13px;">
+                        Remove Signature
+                    </button>
+                </form>
+            {% else %}
+                <div class="logo-placeholder">No signature added</div>
+            {% endif %}
+        </div>
+
+        <button type="button" class="btn btn-primary" style="width:auto; padding:10px 28px; margin-top:16px;" onclick="openSignatureModal()">
+            {% if business.signature_file_id %}Update Signature{% else %}Draw Signature{% endif %}
+        </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 3 — BRANCH OFFICES (Premium Only)
+    ══════════════════════════════════════════════ -->
+    <div class="settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">📌</div>
+            <div>
+                <h2 class="settings-card-title">Branch Offices
+                    {% if business.plan_type != 'premium' %}
+                        <span class="premium-badge">⭐ Premium</span>
+                    {% endif %}
+                </h2>
+                <p class="settings-card-sub">Up to 5 branches · first branch shows on receipts</p>
+            </div>
+        </div>
+
+        {% if business.plan_type == 'premium' %}
+            <!-- Existing branches -->
+            {% set branches = business.branches or [] %}
+            {% if branches %}
+                <div style="margin-bottom: 24px;">
+                    {% for branch in branches %}
+                    <div class="branch-row">
+                        <div>
+                            <div class="branch-label">{{ branch.label or 'Branch ' ~ loop.index }}</div>
+                            <div class="branch-detail">
+                                {{ branch.address }}{% if branch.city %}, {{ branch.city }}{% endif %}{% if branch.state %}, {{ branch.state }}{% endif %}
+                                {% if branch.phone %} · {{ branch.phone }}{% endif %}
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ url_for('settings.remove_branch_route', index=loop.index0) }}">
+                            <button type="submit" class="btn btn-sm"
+                                    style="background:none; border:1px solid #fdecea; color:#c62828; width:auto; padding:6px 14px; font-size:13px;"
+                                    onclick="return confirm('Remove this branch?')">
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-secondary); font-size:14px; margin-bottom:20px;">No branch offices added yet.</p>
+            {% endif %}
+
+            <!-- Add new branch form -->
+            {% if branches | length < 5 %}
+            <details class="add-branch-details">
+                <summary class="add-branch-summary">+ Add Branch Office</summary>
+                <form method="POST" action="{{ url_for('settings.index') }}" style="margin-top: 16px;">
+                    <input type="hidden" name="form_type" value="add_branch">
+                    <div class="settings-two-col">
+                        <div class="settings-field-group" style="grid-column: 1 / -1;">
+                            <label class="settings-label" for="br_label">Branch Label</label>
+                            <input class="form-input" type="text" id="br_label" name="br_label"
+                                   placeholder="e.g. Branch Office">
+                        </div>
+                        <div class="settings-field-group">
+                            <label class="settings-label" for="br_address">Address</label>
+                            <input class="form-input" type="text" id="br_address" name="br_address"
+                                   placeholder="e.g. 11 Hospital Road" required>
+                        </div>
+                        <div class="settings-field-group">
+                            <label class="settings-label" for="br_city">City / Area</label>
+                            <input class="form-input" type="text" id="br_city" name="br_city"
+                                   placeholder="e.g. Rumuola">
+                        </div>
+                        <div class="settings-field-group">
+                            <label class="settings-label" for="br_state">State</label>
+                            <input class="form-input" type="text" id="br_state" name="br_state"
+                                   placeholder="e.g. Rivers State">
+                        </div>
+                        <div class="settings-field-group">
+                            <label class="settings-label" for="br_phone">Branch Phone</label>
+                            <input class="form-input" type="tel" id="br_phone" name="br_phone"
+                                   inputmode="tel" placeholder="e.g. 08012345678">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:auto; padding:10px 28px; margin-top:4px;">
+                        Add Branch
+                    </button>
+                </form>
+            </details>
+            {% endif %}
+
+        {% else %}
+            <div class="premium-locked-panel">
+                <p>Add branch office addresses that print on your receipts.</p>
+                <a href="{{ url_for('billing.upgrade') }}" class="btn btn-primary" style="width:auto; padding:10px 24px; font-size:14px;">
+                    ⭐ Upgrade to Premium
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Signature Modal -->
+<div id="signature-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:#fff; padding:24px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+        <h3 style="margin-top:0; margin-bottom:16px; font-size:18px;">Draw Your Signature</h3>
+        <div style="border:1px solid #ccc; border-radius:8px; background:#f9f9f9; cursor:crosshair; touch-action:none;">
+            <canvas id="signature-pad" width="400" height="200" style="width:100%; height:auto; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:16px;">
+            <button type="button" class="btn btn-sm" onclick="clearSignature()" style="background:#f1f3f5; color:#333; padding:8px 16px;">Clear</button>
+            <div style="display:flex; gap:12px;">
+                <button type="button" class="btn btn-sm" onclick="closeSignatureModal()" style="background:transparent; color:#555; padding:8px 16px;">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveSignature()" style="padding:8px 16px;" id="save-sig-btn">Save Signature</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live bio character counter
+const bioEl = document.getElementById('bio');
+const bioCount = document.getElementById('bio-count');
+if (bioEl && bioCount) {
+    function updateCount() {
+        const len = bioEl.value.length;
+        bioCount.textContent = `${len}/300`;
+        bioCount.style.color = len > 270 ? '#e65100' : 'var(--text-secondary)';
+    }
+    updateCount();
+    bioEl.addEventListener('input', updateCount);
+}
+
+// Logo preview before upload
+function previewLogo(input) {
+    const previewBox = document.getElementById('logo-preview-new');
+    const previewImg = document.getElementById('logo-preview-img-new');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            previewImg.src = e.target.result;
+            previewBox.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Signature Pad Logic
+const sigModal = document.getElementById('signature-modal');
+const canvas = document.getElementById('signature-pad');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+function openSignatureModal() {
+    sigModal.style.display = 'flex';
+    resizeCanvas();
+    clearSignature();
+}
+
+function closeSignatureModal() {
+    sigModal.style.display = 'none';
+}
+
+function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function resizeCanvas() {
+    // Make canvas render sharp on high DPI screens
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = (rect.width / 2) * ratio; // 2:1 aspect ratio
+    ctx.scale(ratio, ratio);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = (rect.width / 2) + 'px';
+    
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#000000';
+}
+
+function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+function startDrawing(e) {
+    drawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    e.preventDefault();
+}
+
+function draw(e) {
+    if (!drawing) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    e.preventDefault();
+}
+
+function stopDrawing() {
+    drawing = false;
+    ctx.closePath();
+}
+
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
+
+canvas.addEventListener('touchstart', startDrawing, {passive: false});
+canvas.addEventListener('touchmove', draw, {passive: false});
+canvas.addEventListener('touchend', stopDrawing);
+canvas.addEventListener('touchcancel', stopDrawing);
+
+window.addEventListener('resize', () => {
+    if (sigModal.style.display === 'flex') {
+        const temp = canvas.toDataURL();
+        resizeCanvas();
+        const img = new Image();
+        img.src = temp;
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width / (window.devicePixelRatio||1), canvas.height / (window.devicePixelRatio||1));
+    }
+});
+
+function saveSignature() {
+    const btn = document.getElementById('save-sig-btn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append('signature', blob, 'signature.png');
+
+        fetch("{{ url_for('settings.upload_signature') }}", {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  window.location.reload();
+              } else {
+                  alert(data.message || 'Error saving signature');
+                  btn.textContent = 'Save Signature';
+                  btn.disabled = false;
+              }
+          }).catch(err => {
+              console.error(err);
+              alert('Network error while saving signature.');
+              btn.textContent = 'Save Signature';
+              btn.disabled = false;
+          });
+    }, 'image/png');
+}
+</script>
+{% endblock %}

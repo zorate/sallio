@@ -15,7 +15,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.3">
 
     <!-- SEO & Meta -->
     <meta name="description" content="{% block meta_description %}Sallio — Simple sales records and digital receipts for small businesses. Sell. Record. Receipt.{% endblock %}">
@@ -61,6 +61,7 @@
                     <a href="{{ url_for('main.dashboard') }}" class="nav-link" role="listitem">Dashboard</a>
                     <a href="{{ url_for('main.new_sale') }}" class="nav-link nav-primary" role="listitem">+ New Sale</a>
                     <a href="{{ url_for('main.history') }}" class="nav-link" role="listitem">History</a>
+                    <a href="{{ url_for('settings.index') }}" class="nav-link" role="listitem">⚙ Settings</a>
                     {% if not business or business.get('plan_type') != 'premium' %}
                         <a href="{{ url_for('billing.upgrade') }}" class="nav-link" style="color:#d35400; border-color:#e67e22;" role="listitem">⭐ Upgrade</a>
                     {% endif %}

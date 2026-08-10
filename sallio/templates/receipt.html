@@ -1,91 +1,209 @@
 {% extends 'base.html' %}
 
-{% block title %}Receipt {{ sale.receipt_number }} - Sallio{% endblock %}
+{% block title %}Receipt {{ sale.receipt_number }} - {{ business.name }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 480px; margin: 0 auto;">
+<div style="max-width: 680px; margin: 0 auto;">
 
-    <div class="glass-panel" id="receipt-card" style="padding: 32px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.05);">
-        
-        <div class="text-center" style="margin-bottom: 24px; border-bottom: 1px dashed var(--border-color); padding-bottom: 24px;">
-            <h2 style="margin: 0 0 4px; color: var(--text-primary);">{{ business_name }}</h2>
-            <p style="margin: 0 0 8px; font-size: 13px; color: var(--text-secondary);">Sales Receipt</p>
-            <p style="margin: 8px 0 0; font-size: 14px; color: var(--text-secondary);">{{ sale.date.strftime('%d %b %Y, %I:%M %p') }}</p>
-            <p style="margin: 4px 0 0; font-size: 14px; font-weight: 500;">{{ sale.receipt_number }}</p>
+    <!-- ══════════════════════════════════════════════
+         RECEIPT CARD
+    ══════════════════════════════════════════════ -->
+    <div class="receipt-card" id="receipt-card">
+
+        <!-- HEADER -->
+        <div class="receipt-header">
+            <!-- Left: Logo + Name + Bio -->
+            <div class="receipt-header-left">
+                {% if business.logo_file_id %}
+                    <img src="{{ url_for('uploads.serve', file_id=business.logo_file_id) }}"
+                         alt="{{ business.name }} logo" class="receipt-logo">
+                {% endif %}
+                <div>
+                    <div class="receipt-biz-name">{{ business.name }}</div>
+                    {% if business.bio %}
+                        <div class="receipt-biz-bio">{{ business.bio }}</div>
+                    {% endif %}
+                    {% if business.display_phone %}
+                        <div class="receipt-biz-phone">Tel: {{ business.display_phone }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right: Address blocks -->
+            {% set ho = business.head_office %}
+            {% set branches = business.branches or [] %}
+            {% if ho and ho.address %}
+            <div class="receipt-addresses">
+                <div class="receipt-address-block">
+                    <div class="receipt-address-label">HEAD OFFICE</div>
+                    <div class="receipt-address-line">{{ ho.address }}</div>
+                    {% if ho.city or ho.state %}
+                        <div class="receipt-address-line">{{ ho.city }}{% if ho.city and ho.state %}, {% endif %}{{ ho.state }}</div>
+                    {% endif %}
+                    {% if ho.phone %}
+                        <div class="receipt-address-line">Tel: {{ ho.phone }}</div>
+                    {% endif %}
+                </div>
+
+                {% if branches %}
+                <div class="receipt-address-block" style="margin-top: 12px;">
+                    <div class="receipt-address-label">{{ branches[0].label or 'BRANCH OFFICE' }}</div>
+                    <div class="receipt-address-line">{{ branches[0].address }}</div>
+                    {% if branches[0].city or branches[0].state %}
+                        <div class="receipt-address-line">{{ branches[0].city }}{% if branches[0].city and branches[0].state %}, {% endif %}{{ branches[0].state }}</div>
+                    {% endif %}
+                    {% if branches[0].phone %}
+                        <div class="receipt-address-line">Tel: {{ branches[0].phone }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
 
+        <!-- RECEIPT META BAR -->
+        <div class="receipt-meta-bar">
+            <div>
+                <span class="receipt-type-badge">SALES RECEIPT</span>
+            </div>
+            <div class="receipt-meta-right">
+                <span class="receipt-meta-label">No.</span>
+                <span class="receipt-meta-value">{{ sale.receipt_number }}</span>
+                <span class="receipt-meta-sep">·</span>
+                <span class="receipt-meta-label">Date</span>
+                <span class="receipt-meta-value">{{ sale.date.strftime('%d %b %Y') }}</span>
+                <span class="receipt-meta-sep">·</span>
+                <span class="receipt-meta-value">{{ sale.date.strftime('%I:%M %p') }}</span>
+            </div>
+        </div>
+
+        <!-- CUSTOMER ROW -->
         {% if sale.customer_name %}
-        <div style="margin-bottom: 24px; font-size: 14px;">
-            <strong>Customer:</strong> {{ sale.customer_name }}
-            {% if sale.customer_phone %}<br><strong>Phone:</strong> {{ sale.customer_phone }}{% endif %}
+        <div class="receipt-customer-row">
+            <span><strong>Customer:</strong> {{ sale.customer_name }}</span>
+            {% if sale.customer_phone %}
+            <span><strong>Tel:</strong> {{ sale.customer_phone }}</span>
+            {% endif %}
         </div>
         {% endif %}
 
-        <div style="margin-bottom: 24px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-                <thead>
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <th style="text-align: left; padding: 8px 0; color: var(--text-secondary); font-weight: 500;">Item</th>
-                        <th style="text-align: right; padding: 8px 0; color: var(--text-secondary); font-weight: 500;">Qty</th>
-                        <th style="text-align: right; padding: 8px 0; color: var(--text-secondary); font-weight: 500;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in sale['items'] %}
-                    <tr>
-                        <td style="padding: 12px 0;">{{ item.name }}<br><span style="font-size: 12px; color: var(--text-secondary);">@ ₦{{ "{:,.2f}".format(item.price) }}</span></td>
-                        <td style="text-align: right; padding: 12px 0;">{{ item.quantity }}</td>
-                        <td style="text-align: right; padding: 12px 0; font-weight: 500;">₦{{ "{:,.2f}".format(item.total) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- ITEMS TABLE -->
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th class="receipt-th" style="width:32px;">#</th>
+                    <th class="receipt-th receipt-th-left">Description</th>
+                    <th class="receipt-th" style="width:48px;">Qty</th>
+                    <th class="receipt-th">Rate (₦)</th>
+                    <th class="receipt-th">Amount (₦)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sale['items'] %}
+                <tr class="receipt-tr">
+                    <td class="receipt-td receipt-td-center">{{ loop.index }}</td>
+                    <td class="receipt-td">{{ item.name }}</td>
+                    <td class="receipt-td receipt-td-center">{{ item.quantity }}</td>
+                    <td class="receipt-td receipt-td-right">{{ "{:,.2f}".format(item.price) }}</td>
+                    <td class="receipt-td receipt-td-right">{{ "{:,.2f}".format(item.total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- TOTAL BAR -->
+        <div class="receipt-total-bar">
+            <div class="receipt-payment-method">
+                Payment: <strong>{{ sale.payment_method }}</strong>
+            </div>
+            <div class="receipt-total-block">
+                <span class="receipt-total-label">TOTAL</span>
+                <span class="receipt-total-amount">₦{{ "{:,.2f}".format(sale.total) }}</span>
+            </div>
         </div>
 
-        <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 8px;">
-                <span style="color: var(--text-secondary);">Payment Method</span>
-                <span style="font-weight: 500;">{{ sale.payment_method }}</span>
+        <!-- FOOTER -->
+        <div class="receipt-footer">
+            <div class="receipt-footer-left">
+                <!-- Removed return policy per user request -->
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; margin-top: 12px;">
-                <span>Total</span>
-                <span style="color: var(--primary-color);">₦{{ "{:,.2f}".format(sale.total) }}</span>
+            <div class="receipt-footer-right">
+                <div style="margin-bottom: 8px; font-size:11px; color:#999;">For: {{ business.name }}</div>
+                {% if business.signature_file_id %}
+                    <img src="{{ url_for('uploads.serve', file_id=business.signature_file_id) }}" alt="Signature" style="max-width: 120px; max-height: 40px; object-fit: contain; display: block; margin: 0 auto 4px;">
+                {% else %}
+                    <div style="height: 32px; margin-bottom: 4px;"></div>
+                {% endif %}
+                <div class="receipt-signature-line"></div>
+                <div style="font-size:11px; color:#999; margin-top:4px;">Authorised Signature</div>
             </div>
         </div>
-        
-        <div class="text-center" style="font-size: 13px; color: var(--text-secondary); margin-top: 32px;">
-            <p style="margin-bottom: 2px;">Thank you for your business!</p>
-            <p style="font-weight: 500;">Powered by Sallio</p>
-        </div>
+
+        <div class="receipt-powered">Powered by <strong>Sallio</strong> ⚡</div>
     </div>
 
-    <!-- Action Buttons -->
-    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
-        <!-- Share via WhatsApp (image) -->
-        <button id="share-btn" onclick="shareReceipt()" class="btn btn-primary"
-                style="background: #25D366; border-color: #25D366; box-shadow: 0 4px 6px rgba(37,211,102,0.2); font-weight: 600; font-size: 17px; padding: 15px;">
-            <svg style="width:20px; height:20px; flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <!-- ══════════════════════════════════════════════
+         ACTION BUTTONS
+    ══════════════════════════════════════════════ -->
+    <div class="receipt-actions">
+        <!-- WhatsApp Share (image) -->
+        <button id="share-btn" onclick="shareReceipt()" class="btn"
+                style="background:#25D366; border-color:#25D366; color:#fff; font-weight:600; font-size:15px; padding:14px 20px; display:flex; align-items:center; gap:8px; justify-content:center;">
+            <svg style="width:18px;height:18px;flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
             </svg>
-            Send Receipt via WhatsApp
+            Send via WhatsApp
         </button>
 
         <!-- Download Image -->
         <button id="download-btn" onclick="downloadReceipt()" class="btn"
-                style="background: #fff; color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 15px; padding: 12px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download Receipt Image
+                style="background:#fff; color:var(--primary-color); border:2px solid var(--primary-color); font-weight:600; font-size:15px; padding:14px 20px; display:flex; align-items:center; gap:8px; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Image
         </button>
+
+        <!-- PDF Download — Premium only -->
+        {% if business.plan_type == 'premium' %}
+        <a href="{{ url_for('main.receipt_print', receipt_number=sale.receipt_number) }}"
+           target="_blank"
+           class="btn"
+           style="background:#1a1a2e; color:#fff; border:2px solid #1a1a2e; font-weight:600; font-size:15px; padding:14px 20px; display:flex; align-items:center; gap:8px; justify-content:center; text-decoration:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Download PDF
+        </a>
+        {% else %}
+        <div style="position:relative;">
+            <button class="btn" onclick="showPdfPaywall()"
+                    style="background:#f8f9fa; color:var(--text-secondary); border:2px dashed #ced4da; font-weight:600; font-size:15px; padding:14px 20px; display:flex; align-items:center; gap:8px; justify-content:center; width:100%;">
+                🔒 Download PDF <span style="font-size:12px; background:#e67e22; color:#fff; padding:2px 6px; border-radius:10px; margin-left:4px;">Premium</span>
+            </button>
+        </div>
+        {% endif %}
     </div>
 </div>
 
 <!-- Paywall Modal -->
 <div id="paywall-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center; padding:16px;">
     <div style="background:#fff; padding:32px 24px; border-radius:16px; max-width:400px; width:100%; text-align:center; box-shadow:0 12px 24px rgba(0,0,0,0.2); position:relative;">
-        <button onclick="document.getElementById('paywall-modal').style.display='none'" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-secondary);">&times;</button>
+        <button onclick="document.getElementById('paywall-modal').style.display='none'" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-secondary);">×</button>
         <div style="font-size:48px; margin-bottom:16px;">⭐</div>
         <h2 style="color:var(--primary-color); margin-bottom:8px;">Quota Exceeded</h2>
-        <p style="color:var(--text-secondary); margin-bottom:24px; font-size:15px;">You've reached your free limit of 15 receipt generations for this week. Upgrade to Premium for unlimited receipts and advanced features!</p>
+        <p style="color:var(--text-secondary); margin-bottom:24px; font-size:15px;">You've reached your free limit of 15 receipt generations for this week. Upgrade to Premium for unlimited receipts and more!</p>
+        <a href="{{ url_for('billing.upgrade') }}" class="btn btn-primary" style="width:100%; padding:14px; font-size:16px; font-weight:600;">Upgrade to Premium</a>
+    </div>
+</div>
+
+<!-- PDF Paywall Modal -->
+<div id="pdf-paywall-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; padding:32px 24px; border-radius:16px; max-width:400px; width:100%; text-align:center; box-shadow:0 12px 24px rgba(0,0,0,0.2); position:relative;">
+        <button onclick="document.getElementById('pdf-paywall-modal').style.display='none'" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-secondary);">×</button>
+        <div style="font-size:48px; margin-bottom:16px;">📄</div>
+        <h2 style="color:var(--primary-color); margin-bottom:8px;">PDF Download is Premium</h2>
+        <p style="color:var(--text-secondary); margin-bottom:24px; font-size:15px;">Upgrade to Premium to download professional PDF receipts your customers can keep on file.</p>
         <a href="{{ url_for('billing.upgrade') }}" class="btn btn-primary" style="width:100%; padding:14px; font-size:16px; font-weight:600;">Upgrade to Premium</a>
     </div>
 </div>
@@ -95,6 +213,10 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script>
+function showPdfPaywall() {
+    document.getElementById('pdf-paywall-modal').style.display = 'flex';
+}
+
 async function _checkQuota() {
     try {
         const res = await fetch("{{ url_for('billing.track_receipt') }}", {
@@ -107,66 +229,40 @@ async function _checkQuota() {
         }
         return res.ok;
     } catch (err) {
-        console.error("Quota check failed", err);
         return false;
     }
 }
 
 async function _captureReceiptCanvas() {
-    const receiptCard = document.getElementById('receipt-card');
-    const bg = receiptCard.style.background;
-    receiptCard.style.background = '#ffffff';
-    const canvas = await html2canvas(receiptCard, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
-    });
-    receiptCard.style.background = bg;
-    return canvas;
+    const card = document.getElementById('receipt-card');
+    return await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
 }
 
 async function shareReceipt() {
     const btn = document.getElementById('share-btn');
     const restore = Sallio.buttonLoading(btn, 'Checking...');
-
     const hasQuota = await _checkQuota();
-    if (!hasQuota) {
-        restore();
-        return;
-    }
-
+    if (!hasQuota) { restore(); return; }
     restore();
-    const generateRestore = Sallio.buttonLoading(btn, 'Generating image...');
-    
+    const generateRestore = Sallio.buttonLoading(btn, 'Generating...');
     try {
         const canvas = await _captureReceiptCanvas();
-
         canvas.toBlob(async (blob) => {
             const file = new File([blob], 'receipt-{{ sale.receipt_number }}.png', { type: 'image/png' });
-
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Receipt {{ sale.receipt_number }}',
-                        text: 'Your receipt from {{ business_name }}. Thank you for your business!'
-                    });
-                    Sallio.success('Receipt shared successfully.');
-                } catch (shareErr) {
-                    if (shareErr.name !== 'AbortError') {
-                        _fallbackDownload(blob);
-                        Sallio.info('Receipt downloaded. Attach it in WhatsApp.');
-                    }
+                    await navigator.share({ files: [file], title: 'Receipt {{ sale.receipt_number }}', text: 'Your receipt from {{ business.name }}.' });
+                    Sallio.success('Receipt shared.');
+                } catch (e) {
+                    if (e.name !== 'AbortError') { _fallbackDownload(blob); Sallio.info('Saved. Attach in WhatsApp.'); }
                 }
             } else {
                 _fallbackDownload(blob);
-                Sallio.info("Image downloaded. Attach it in WhatsApp to send your receipt.");
+                Sallio.info('Saved. Attach in WhatsApp to send.');
             }
         }, 'image/png');
-
     } catch (err) {
-        console.error('Receipt generation error:', err);
-        Sallio.error('Could not generate receipt image. Please try again.');
+        Sallio.error('Could not generate image. Please try again.');
     } finally {
         generateRestore();
     }
@@ -175,24 +271,15 @@ async function shareReceipt() {
 async function downloadReceipt() {
     const btn = document.getElementById('download-btn');
     const restore = Sallio.buttonLoading(btn, 'Checking...');
-
     const hasQuota = await _checkQuota();
-    if (!hasQuota) {
-        restore();
-        return;
-    }
-
+    if (!hasQuota) { restore(); return; }
     restore();
     const generateRestore = Sallio.buttonLoading(btn, 'Downloading...');
-
     try {
         const canvas = await _captureReceiptCanvas();
-        canvas.toBlob((blob) => {
-            _fallbackDownload(blob);
-            Sallio.success('Receipt downloaded.');
-        }, 'image/png');
+        canvas.toBlob((blob) => { _fallbackDownload(blob); Sallio.success('Receipt downloaded.'); }, 'image/png');
     } catch (err) {
-        Sallio.error('Could not download receipt. Please try again.');
+        Sallio.error('Could not download receipt.');
     } finally {
         generateRestore();
     }
@@ -200,13 +287,10 @@ async function downloadReceipt() {
 
 function _fallbackDownload(blob) {
     const url = URL.createObjectURL(blob);
-    const a   = document.createElement('a');
-    a.href     = url;
-    a.download = 'receipt-{{ sale.receipt_number }}.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'receipt-{{ sale.receipt_number }}.png';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 </script>
 {% endblock %}

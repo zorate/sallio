@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt {{ sale.receipt_number }} — {{ business.name }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 12px;
+            color: #1a1a1a;
+            background: #fff;
+        }
+
+        .receipt-wrap {
+            width: 148mm;   /* A5 width */
+            min-height: 210mm;
+            margin: 0 auto;
+            padding: 12mm 10mm;
+            background: #fff;
+        }
+
+        /* Header */
+        .rp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8mm; border-bottom: 2px solid #1a1a1a; padding-bottom: 5mm; }
+        .rp-biz-name { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 2px; }
+        .rp-bio { font-size: 9px; color: #555; max-width: 70mm; line-height: 1.4; margin-bottom: 4px; }
+        .rp-biz-phone { font-size: 9px; color: #555; }
+        .rp-logo { width: 40px; height: 40px; object-fit: contain; margin-right: 8px; }
+        .rp-logo-wrap { display: flex; align-items: flex-start; }
+
+        .rp-addresses { text-align: right; font-size: 9px; line-height: 1.5; }
+        .rp-addr-label { font-weight: 700; text-transform: uppercase; font-size: 8px; letter-spacing: 0.5px; margin-bottom: 1px; }
+        .rp-addr-block + .rp-addr-block { margin-top: 6px; padding-top: 6px; border-top: 1px solid #e0e0e0; }
+
+        /* Meta bar */
+        .rp-meta { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; color: #fff; padding: 4px 8px; margin-bottom: 5mm; border-radius: 2px; }
+        .rp-meta-badge { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        .rp-meta-right { font-size: 9px; }
+
+        /* Customer */
+        .rp-customer { font-size: 10px; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 1px solid #e0e0e0; display: flex; gap: 24px; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+        thead tr { background: #1a1a1a; color: #fff; }
+        th { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; padding: 4px 6px; text-align: right; }
+        th:first-child, th:nth-child(2) { text-align: left; }
+        td { font-size: 10px; padding: 5px 6px; border-bottom: 1px solid #f0f0f0; text-align: right; }
+        td:first-child { text-align: center; color: #888; font-size: 9px; }
+        td:nth-child(2) { text-align: left; font-weight: 500; }
+        tbody tr:nth-child(even) { background: #fafafa; }
+
+        /* Total */
+        .rp-total-bar { display: flex; justify-content: flex-end; border-top: 2px solid #1a1a1a; padding-top: 4px; margin-bottom: 6mm; }
+        .rp-total-inner { text-align: right; }
+        .rp-total-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; }
+        .rp-total-amount { font-size: 18px; font-weight: 800; }
+
+        /* Footer */
+        .rp-footer { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e0e0e0; padding-top: 5mm; margin-top: auto; }
+        .rp-footer-note { font-size: 8px; color: #888; line-height: 1.6; }
+        .rp-sig-area { text-align: center; }
+        .rp-sig-line { width: 40mm; border-top: 1px solid #1a1a1a; margin-bottom: 2px; }
+        .rp-sig-label { font-size: 8px; color: #888; }
+        .rp-for { font-size: 8px; color: #888; margin-bottom: 6mm; }
+
+        .rp-powered { text-align: center; font-size: 8px; color: #aaa; margin-top: 8mm; }
+
+        /* Print chrome removal */
+        @media print {
+            @page { size: A5 portrait; margin: 0; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Print button (hidden on actual print) -->
+<div class="no-print" style="padding: 12px 16px; background: #1a1a2e; text-align: center;">
+    <button onclick="window.print()"
+            style="background:#2e7d32; color:#fff; border:none; padding:10px 28px; font-size:15px; font-weight:600; border-radius:8px; cursor:pointer;">
+        🖨 Print / Save as PDF
+    </button>
+    <p style="color:#aaa; font-size:12px; margin-top:8px;">In the print dialog, choose "Save as PDF" to download.</p>
+</div>
+
+<div class="receipt-wrap">
+
+    <!-- HEADER -->
+    <div class="rp-header">
+        <div class="rp-logo-wrap">
+            {% if business.logo_file_id %}
+            <img src="{{ url_for('uploads.serve', file_id=business.logo_file_id, _external=True) }}"
+                 alt="Logo" class="rp-logo">
+            {% endif %}
+            <div>
+                <div class="rp-biz-name">{{ business.name }}</div>
+                {% if business.bio %}
+                    <div class="rp-bio">{{ business.bio }}</div>
+                {% endif %}
+                {% if business.display_phone %}
+                    <div class="rp-biz-phone">Tel: {{ business.display_phone }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% set ho = business.head_office %}
+        {% set branches = business.branches or [] %}
+        {% if ho and ho.address %}
+        <div class="rp-addresses">
+            <div class="rp-addr-block">
+                <div class="rp-addr-label">Head Office</div>
+                <div>{{ ho.address }}</div>
+                {% if ho.city or ho.state %}
+                    <div>{{ ho.city }}{% if ho.city and ho.state %}, {% endif %}{{ ho.state }}</div>
+                {% endif %}
+                {% if ho.phone %}<div>Tel: {{ ho.phone }}</div>{% endif %}
+            </div>
+            {% if branches %}
+            <div class="rp-addr-block">
+                <div class="rp-addr-label">{{ branches[0].label or 'Branch Office' }}</div>
+                <div>{{ branches[0].address }}</div>
+                {% if branches[0].city or branches[0].state %}
+                    <div>{{ branches[0].city }}{% if branches[0].city and branches[0].state %}, {% endif %}{{ branches[0].state }}</div>
+                {% endif %}
+                {% if branches[0].phone %}<div>Tel: {{ branches[0].phone }}</div>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- META BAR -->
+    <div class="rp-meta">
+        <span class="rp-meta-badge">Sales Receipt</span>
+        <span class="rp-meta-right">No: {{ sale.receipt_number }} &nbsp;·&nbsp; {{ sale.date.strftime('%d %b %Y, %I:%M %p') }}</span>
+    </div>
+
+    <!-- CUSTOMER -->
+    {% if sale.customer_name %}
+    <div class="rp-customer">
+        <span><strong>Customer:</strong> {{ sale.customer_name }}</span>
+        {% if sale.customer_phone %}
+        <span><strong>Tel:</strong> {{ sale.customer_phone }}</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ITEMS TABLE -->
+    <table>
+        <thead>
+            <tr>
+                <th style="width:20px;">#</th>
+                <th>Description</th>
+                <th style="width:30px;">Qty</th>
+                <th style="width:50px;">Rate (₦)</th>
+                <th style="width:55px;">Amount (₦)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sale['items'] %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.name }}</td>
+                <td style="text-align:center;">{{ item.quantity }}</td>
+                <td>{{ "{:,.2f}".format(item.price) }}</td>
+                <td>{{ "{:,.2f}".format(item.total) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- TOTAL -->
+    <div class="rp-total-bar">
+        <div class="rp-total-inner">
+            <div class="rp-total-label">Payment: {{ sale.payment_method }} &nbsp;·&nbsp; Total</div>
+            <div class="rp-total-amount">₦{{ "{:,.2f}".format(sale.total) }}</div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="rp-footer">
+        <div class="rp-footer-note">
+            Thank you for your business!
+        </div>
+        <div class="rp-sig-area">
+            <div class="rp-for" style="margin-bottom:4px;">For: {{ business.name }}</div>
+            {% if business.signature_file_id %}
+                <img src="{{ url_for('uploads.serve', file_id=business.signature_file_id, _external=True) }}" alt="Signature" style="max-width: 100px; max-height: 35px; object-fit: contain; display: block; margin: 0 auto 2px;">
+            {% else %}
+                <div style="height: 25px; margin-bottom: 2px;"></div>
+            {% endif %}
+            <div class="rp-sig-line"></div>
+            <div class="rp-sig-label">Authorised Signature</div>
+        </div>
+    </div>
+
+    <div class="rp-powered">Powered by Sallio ⚡</div>
+</div>
+
+<script>
+    // Auto-trigger print dialog when opened in new tab
+    window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+</script>
+</body>
+</html>

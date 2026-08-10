@@ -123,7 +123,7 @@ def create_sale(business_id, items, payment_method, customer_name=None, customer
     if not validated_items:
         raise ValueError("No valid items in the sale.")
         
-    receipt_number = generate_receipt_number()
+    receipt_number = get_next_business_receipt_number(business_id)
     
     sale_doc = {
         'business_id': ObjectId(business_id),
@@ -255,3 +255,127 @@ def upgrade_to_premium(business_id, reference):
     )
     return True
 
+
+# ---------------------------------------------------------------------------
+# Business Settings Helpers
+# ---------------------------------------------------------------------------
+
+def update_business_settings(business_id: str, data: dict) -> bool:
+    """
+    Update editable business profile fields.
+    Accepts: bio, display_phone, head_office dict.
+    """
+    db = get_db()
+    allowed_top = {'bio', 'display_phone', 'head_office'}
+    update_data = {k: v for k, v in data.items() if k in allowed_top}
+
+    # Enforce bio character limit server-side
+    if 'bio' in update_data:
+        update_data['bio'] = str(update_data['bio'])[:300]
+
+    if not update_data:
+        return False
+
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$set': update_data}
+    )
+    return True
+
+
+def add_branch(business_id: str, branch: dict) -> bool:
+    """Append a branch office to the branches array (Premium only, max 5)."""
+    db = get_db()
+    business = get_business(business_id)
+    if not business:
+        return False
+
+    branches = business.get('branches', [])
+    if len(branches) >= 5:
+        return False  # hard cap
+
+    allowed = {'label', 'address', 'city', 'state', 'phone'}
+    clean = {k: str(v).strip() for k, v in branch.items() if k in allowed}
+
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$push': {'branches': clean}}
+    )
+    return True
+
+
+def remove_branch(business_id: str, index: int) -> bool:
+    """Remove branch at the given 0-based index."""
+    db = get_db()
+    business = get_business(business_id)
+    if not business:
+        return False
+
+    branches = business.get('branches', [])
+    if index < 0 or index >= len(branches):
+        return False
+
+    # MongoDB doesn't support remove-by-index directly;
+    # use a temporary sentinel then pull it.
+    sentinel = {'_sallio_delete_': True}
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$set': {f'branches.{index}': sentinel}}
+    )
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$pull': {'branches': sentinel}}
+    )
+    return True
+
+
+def save_logo(business_id: str, file_id: str, old_file_id: str = None) -> bool:
+    """
+    Store the GridFS file_id on the business document.
+    Deletes the old logo from GridFS if one existed.
+    """
+    from sallio.storage import delete_file
+    db = get_db()
+
+    if old_file_id:
+        delete_file(old_file_id)
+
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$set': {'logo_file_id': file_id}}
+    )
+    return True
+
+
+def save_signature(business_id: str, file_id: str, old_file_id: str = None) -> bool:
+    """
+    Store the GridFS file_id for the signature on the business document.
+    Deletes the old signature from GridFS if one existed.
+    """
+    from sallio.storage import delete_file
+    db = get_db()
+
+    if old_file_id:
+        delete_file(old_file_id)
+
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$set': {'signature_file_id': file_id}}
+    )
+    return True
+
+
+def get_next_business_receipt_number(business_id: str) -> str:
+    """
+    Atomically increment and return a per-business receipt number.
+    Format: #0001, #0002, ...
+    """
+    db = get_db()
+    result = db.businesses.find_one_and_update(
+        {'_id': ObjectId(business_id)},
+        {'$inc': {'receipt_counter': 1}},
+        return_document=ReturnDocument.AFTER,
+        upsert=False
+    )
+    seq = result.get('receipt_counter', 1) if result else 1
+    return f'#{seq:04d}'

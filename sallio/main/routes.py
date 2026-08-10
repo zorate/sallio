@@ -11,9 +11,10 @@ def index():
 @bp.route('/dashboard')
 @login_required
 def dashboard():
-    from sallio.models import get_dashboard_stats
+    from sallio.models import get_dashboard_stats, get_business
     stats = get_dashboard_stats(current_user.business_id)
-    return render_template('dashboard.html', stats=stats)
+    business = get_business(current_user.business_id)
+    return render_template('dashboard.html', stats=stats, business=business)
 
 @bp.route('/sale/new', methods=['GET', 'POST'])
 @login_required
@@ -50,7 +51,7 @@ def new_sale():
             
     return render_template('sale_new.html')
 
-from sallio.models import get_sale, get_sales
+from sallio.models import get_sale, get_sales, get_business
 
 @bp.route('/receipt/<receipt_number>')
 @login_required
@@ -59,25 +60,35 @@ def receipt(receipt_number):
     if not sale:
         flash('Receipt not found or access denied.', 'error')
         return redirect(url_for('main.dashboard'))
-    
-    # Fetch business name from DB
-    from sallio.db import get_db
-    db = get_db()
-    business = db.businesses.find_one({'_id': ObjectId(current_user.business_id)})
-    business_name = business['name'] if business else 'Our Shop'
-        
-    # Generate WhatsApp message text
-    items_text = ", ".join([f"{item['quantity']}x {item['name']}" for item in sale['items']])
-    wa_msg = f"Receipt from {business_name}%0A" \
-             f"Receipt: {sale['receipt_number']}%0A" \
-             f"Total: NGN {sale['total']:,.2f}%0A" \
-             f"Items: {items_text}%0A" \
-             f"Thank you for your business!"
-             
-    return render_template('receipt.html', sale=sale, wa_msg=wa_msg, business_name=business_name)
+
+    business = get_business(current_user.business_id)
+    if not business:
+        flash('Business not found.', 'error')
+        return redirect(url_for('main.dashboard'))
+
+    return render_template('receipt.html', sale=sale, business=business)
+
+
+@bp.route('/receipt/<receipt_number>/print')
+@login_required
+def receipt_print(receipt_number):
+    """Print-optimised view — Premium only. Auto-triggers browser print dialog."""
+    business = get_business(current_user.business_id)
+    if not business or business.get('plan_type') != 'premium':
+        flash('PDF download is a Premium feature.', 'error')
+        return redirect(url_for('main.receipt', receipt_number=receipt_number))
+
+    sale = get_sale(receipt_number, current_user.business_id)
+    if not sale:
+        flash('Receipt not found.', 'error')
+        return redirect(url_for('main.dashboard'))
+
+    return render_template('receipt_print.html', sale=sale, business=business)
+
 
 @bp.route('/history')
 @login_required
 def history():
     sales = get_sales(current_user.business_id)
-    return render_template('history.html', sales=sales)
+    business = get_business(current_user.business_id)
+    return render_template('history.html', sales=sales, business=business)
