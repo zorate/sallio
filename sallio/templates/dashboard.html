@@ -10,28 +10,28 @@
 
     <p style="color: var(--text-secondary); margin-bottom: 24px;">Welcome to your business dashboard.</p>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
-        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Today's Sales</div>
-            <div style="font-size: 20px; font-weight: 600; color: var(--primary-color);">₦{{ "{:,.2f}".format(stats.today_total) }}</div>
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-card-title">Today's Sales</div>
+            <div class="stat-card-value" style="color: var(--primary-color);">₦{{ "{:,.2f}".format(stats.today_total) }}</div>
         </div>
-        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">This Week</div>
-            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">₦{{ "{:,.2f}".format(stats.week_total) }}</div>
+        <div class="stat-card">
+            <div class="stat-card-title">This Week</div>
+            <div class="stat-card-value" style="color: var(--text-primary);">₦{{ "{:,.2f}".format(stats.week_total) }}</div>
         </div>
-        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">This Month</div>
-            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">₦{{ "{:,.2f}".format(stats.month_total) }}</div>
+        <div class="stat-card">
+            <div class="stat-card-title">This Month</div>
+            <div class="stat-card-value" style="color: var(--text-primary);">₦{{ "{:,.2f}".format(stats.month_total) }}</div>
         </div>
-        <div style="background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Total Sales</div>
-            <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">{{ stats.total_sales_count }}</div>
+        <div class="stat-card">
+            <div class="stat-card-title">Total Sales</div>
+            <div class="stat-card-value" style="color: var(--text-primary);">{{ stats.total_sales_count }}</div>
         </div>
     </div>
     
-    <div style="margin-top: 24px; display: flex; gap: 12px; flex-direction: column;">
-        <a href="{{ url_for('main.new_sale') }}" class="btn btn-primary" style="padding: 16px; font-size: 18px;">RECORD NEW SALE</a>
-        <a href="{{ url_for('main.history') }}" class="btn" style="background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color);">VIEW SALES HISTORY</a>
+    <div style="margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="{{ url_for('main.new_sale') }}" class="btn btn-primary" style="padding: 16px 32px; font-size: 16px; width: auto; min-width: 200px;">RECORD NEW SALE</a>
+        <a href="{{ url_for('main.history') }}" class="btn" style="background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); font-weight: 600; width: auto; min-width: 200px;">VIEW SALES HISTORY</a>
         
         {% set business = get_business(current_user.business_id) %}
         {% if business and business.get('plan_type') == 'premium' %}

@@ -3,7 +3,8 @@
 {% block title %}Create Account - Sallio{% endblock %}
 
 {% block content %}
-<div class="glass-panel" style="max-width: 400px; margin: 0 auto;">
+<div class="form-container">
+    <div class="glass-panel">
     <h2 class="text-center" style="color: var(--primary-color);">Start Selling</h2>
     <p class="text-center">Create your Sallio business account</p>
 
@@ -37,6 +38,7 @@
     
     <div class="text-center" style="margin-top: 24px; font-size: 14px;">
         Already have an account? <a href="{{ url_for('auth.login') }}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Log in</a>
+    </div>
     </div>
 </div>
 {% endblock %}
