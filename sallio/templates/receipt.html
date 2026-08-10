@@ -88,28 +88,30 @@
         {% endif %}
 
         <!-- ITEMS TABLE -->
-        <table class="receipt-table">
-            <thead>
-                <tr>
-                    <th class="receipt-th" style="width:32px;">#</th>
-                    <th class="receipt-th receipt-th-left">Description</th>
-                    <th class="receipt-th" style="width:48px;">Qty</th>
-                    <th class="receipt-th">Rate (₦)</th>
-                    <th class="receipt-th">Amount (₦)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in sale['items'] %}
-                <tr class="receipt-tr">
-                    <td class="receipt-td receipt-td-center">{{ loop.index }}</td>
-                    <td class="receipt-td">{{ item.name }}</td>
-                    <td class="receipt-td receipt-td-center">{{ item.quantity }}</td>
-                    <td class="receipt-td receipt-td-right">{{ "{:,.2f}".format(item.price) }}</td>
-                    <td class="receipt-td receipt-td-right">{{ "{:,.2f}".format(item.total) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th class="receipt-th" style="width:32px;">#</th>
+                        <th class="receipt-th receipt-th-left">Description</th>
+                        <th class="receipt-th" style="width:48px;">Qty</th>
+                        <th class="receipt-th">Rate (₦)</th>
+                        <th class="receipt-th">Amount (₦)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in sale['items'] %}
+                    <tr class="receipt-tr">
+                        <td class="receipt-td receipt-td-center">{{ loop.index }}</td>
+                        <td class="receipt-td">{{ item.name }}</td>
+                        <td class="receipt-td receipt-td-center">{{ item.quantity }}</td>
+                        <td class="receipt-td receipt-td-right">{{ "{:,.2f}".format(item.price) }}</td>
+                        <td class="receipt-td receipt-td-right">{{ "{:,.2f}".format(item.total) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <!-- TOTAL BAR -->
         <div class="receipt-total-bar">

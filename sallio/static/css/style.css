@@ -844,7 +844,8 @@ footer p { margin: 0; color: var(--text-secondary); }
     margin-top: 8px;
   }
   .receipt-meta-bar { flex-direction: column; gap: 4px; align-items: flex-start; padding: 10px 16px; }
-  .receipt-customer-row, .receipt-td, .receipt-th { padding-left: 16px; padding-right: 16px; }
+  .receipt-customer-row { padding-left: 16px; padding-right: 16px; }
+  .receipt-td, .receipt-th { padding-left: 6px; padding-right: 6px; font-size: 11px; }
   .receipt-total-bar { flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px; }
   .receipt-footer { flex-direction: column; gap: 20px; padding: 16px; }
   .receipt-actions { grid-template-columns: 1fr; }
