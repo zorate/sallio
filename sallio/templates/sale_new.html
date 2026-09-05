@@ -11,13 +11,22 @@
 
     <form method="POST" action="{{ url_for('main.new_sale') }}" id="sale-form" novalidate>
         
+        {% if products %}
+        <datalist id="products-list">
+            {% for product in products %}
+            <option value="{{ product.name }}" data-price="{{ product.unit_price }}" data-id="{{ product._id }}"></option>
+            {% endfor %}
+        </datalist>
+        {% endif %}
+
         <div id="items-container">
             <!-- First Item — cannot be removed -->
             <div class="item-row" style="background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+                <input type="hidden" name="product_id[]" class="product-id-input" value="">
                 <div class="form-field">
                     <label>Item Name</label>
-                    <input class="form-input" type="text" name="item_name[]" required
-                           placeholder="e.g. Blue Sneakers">
+                    <input class="form-input item-name-input" type="text" name="item_name[]" list="products-list" required
+                           placeholder="e.g. Blue Sneakers" autocomplete="off">
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <div style="flex: 1;">
@@ -111,6 +120,32 @@ document.addEventListener('DOMContentLoaded', function () {
             e.target.classList.contains('price-input')) {
             calculateTotal();
         }
+        
+        if (e.target.classList.contains('item-name-input')) {
+            const input = e.target;
+            const row = input.closest('.item-row');
+            const priceInput = row.querySelector('.price-input');
+            const productIdInput = row.querySelector('.product-id-input');
+            
+            const datalist = document.getElementById('products-list');
+            let matched = false;
+            if (datalist) {
+                for (let option of datalist.options) {
+                    if (option.value === input.value) {
+                        priceInput.value = option.getAttribute('data-price');
+                        if (productIdInput) {
+                            productIdInput.value = option.getAttribute('data-id');
+                        }
+                        calculateTotal();
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+            if (!matched && productIdInput) {
+                productIdInput.value = '';
+            }
+        }
     });
 
     // ── Add item row ──────────────────────────────────────────
@@ -124,10 +159,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 style="position:absolute; top:8px; right:8px; background:none; border:none; color:#dc3545; font-size:22px; cursor:pointer; padding:2px 6px; line-height:1;">
                 &times;
             </button>
+            <input type="hidden" name="product_id[]" class="product-id-input" value="">
             <div class="form-field" style="padding-right:28px;">
                 <label>Item Name</label>
-                <input class="form-input" type="text" name="item_name[]" required
-                       placeholder="e.g. Blue Sneakers">
+                <input class="form-input item-name-input" type="text" name="item_name[]" list="products-list" required
+                       placeholder="e.g. Blue Sneakers" autocomplete="off">
             </div>
             <div style="display:flex; gap:12px;">
                 <div style="flex:1;">

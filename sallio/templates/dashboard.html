@@ -42,6 +42,14 @@
         </div>
     </div>
     
+    <!-- Analytics Chart -->
+    <div style="margin-top: 32px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;">
+        <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 16px; color: var(--text-secondary);">30-Day Revenue Trend</h3>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+    
     <div style="margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap;">
         <a href="{{ url_for('main.new_sale') }}" class="btn btn-primary" style="padding: 16px 32px; font-size: 16px; width: auto; min-width: 200px;">RECORD NEW SALE</a>
         <a href="{{ url_for('main.history') }}" class="btn" style="background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); font-weight: 600; width: auto; min-width: 200px;">VIEW SALES HISTORY</a>
@@ -60,4 +68,69 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('revenueChart');
+    if (ctx) {
+        const labels = {{ stats.chart_labels | tojson | safe }};
+        const data = {{ stats.chart_data | tojson | safe }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Daily Revenue (?)',
+                    data: data,
+                    borderColor: '#0284c7', // Primary color
+                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#0284c7',
+                    pointRadius: 3,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let value = context.parsed.y;
+                                return '?' + value.toLocaleString('en-NG', {minimumFractionDigits: 2});
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000) {
+                                    return '?' + (value / 1000) + 'k';
+                                }
+                                return '?' + value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -15,7 +15,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.4">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.6">
 
     <!-- SEO & Meta -->
     <meta name="description" content="{% block meta_description %}Sallio — Simple sales records and digital receipts for small businesses. Sell. Record. Receipt.{% endblock %}">
@@ -25,6 +25,13 @@
     <meta property="og:description" content="The digital sales notebook for small businesses. Record sales and generate professional receipts in seconds.">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Sallio">
+    
+    <!-- Theme Detection -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
 </head>
 <body>
     <!-- Accessibility: skip to main content -->
@@ -60,6 +67,7 @@
                     {% set business = get_business(current_user.business_id) %}
                     <a href="{{ url_for('main.dashboard') }}" class="nav-link" role="listitem">Dashboard</a>
                     <a href="{{ url_for('main.new_sale') }}" class="nav-link nav-primary" role="listitem">+ New Sale</a>
+                    <a href="{{ url_for('main.products') }}" class="nav-link" role="listitem">Products</a>
                     <a href="{{ url_for('main.history') }}" class="nav-link" role="listitem">History</a>
                     <a href="{{ url_for('settings.index') }}" class="nav-link" role="listitem">⚙ Settings</a>
                     {% if not business or business.get('plan_type') != 'premium' %}
@@ -70,6 +78,10 @@
                     <a href="{{ url_for('auth.login') }}" class="nav-link" role="listitem">Log in</a>
                     <a href="{{ url_for('auth.register') }}" class="nav-link nav-primary" role="listitem">Get Started →</a>
                 {% endif %}
+                <button id="theme-toggle" class="nav-link" style="background:transparent; border:none; cursor:pointer; display:flex; align-items:center; padding: 8px; color: var(--text-primary);" title="Toggle Dark Mode">
+                    <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg id="theme-icon-sun" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
             </div>
         </nav>
 
@@ -94,6 +106,32 @@
                     const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
                     menuBtn.setAttribute('aria-expanded', !isExpanded);
                     navLinks.classList.toggle('active');
+                });
+            }
+            
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                const iconMoon = document.getElementById('theme-icon-moon');
+                const iconSun = document.getElementById('theme-icon-sun');
+                
+                const currentTheme = localStorage.getItem('theme');
+                if (currentTheme === 'dark') {
+                    iconMoon.style.display = 'none';
+                    iconSun.style.display = 'block';
+                }
+                themeBtn.addEventListener('click', () => {
+                    let theme = localStorage.getItem('theme');
+                    if (theme === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('theme', 'light');
+                        iconMoon.style.display = 'block';
+                        iconSun.style.display = 'none';
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('theme', 'dark');
+                        iconMoon.style.display = 'none';
+                        iconSun.style.display = 'block';
+                    }
                 });
             }
         });

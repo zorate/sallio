@@ -113,12 +113,20 @@ def create_sale(business_id, items, payment_method, customer_name=None, customer
         if name and qty > 0 and price >= 0:
             item_total = qty * price
             subtotal += item_total
-            validated_items.append({
+            
+            val_item = {
                 'name': name,
                 'quantity': qty,
                 'price': price,
                 'total': item_total
-            })
+            }
+            if item.get('product_id'):
+                try:
+                    val_item['product_id'] = ObjectId(item['product_id'])
+                except:
+                    pass
+                    
+            validated_items.append(val_item)
             
     if not validated_items:
         raise ValueError("No valid items in the sale.")
@@ -161,6 +169,7 @@ def get_dashboard_stats(business_id):
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     start_of_week = start_of_day - datetime.timedelta(days=now.weekday())
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    thirty_days_ago = start_of_day - datetime.timedelta(days=29)
     
     pipeline = [
         {'$match': {'business_id': ObjectId(business_id)}},
@@ -174,14 +183,49 @@ def get_dashboard_stats(business_id):
     ]
     
     result = list(db.sales.aggregate(pipeline))
-    if result:
-        return result[0]
-    return {
+    stats = result[0] if result else {
         'total_sales_count': 0,
         'today_total': 0,
         'week_total': 0,
         'month_total': 0
     }
+    
+    # Chart data (last 30 days)
+    chart_pipeline = [
+        {'$match': {
+            'business_id': ObjectId(business_id),
+            'date': {'$gte': thirty_days_ago}
+        }},
+        {'$group': {
+            '_id': {
+                'year': {'$year': '$date'},
+                'month': {'$month': '$date'},
+                'day': {'$dayOfMonth': '$date'}
+            },
+            'daily_total': {'$sum': '$total'}
+        }},
+        {'$sort': {'_id.year': 1, '_id.month': 1, '_id.day': 1}}
+    ]
+    
+    chart_results = list(db.sales.aggregate(chart_pipeline))
+    
+    # Fill in missing days
+    chart_data = []
+    labels = []
+    
+    # Create dictionary of existing results
+    res_dict = {f"{r['_id']['year']}-{r['_id']['month']:02d}-{r['_id']['day']:02d}": r['daily_total'] for r in chart_results}
+    
+    for i in range(30):
+        current = thirty_days_ago + datetime.timedelta(days=i)
+        key = current.strftime('%Y-%m-%d')
+        labels.append(current.strftime('%d %b'))
+        chart_data.append(res_dict.get(key, 0))
+        
+    stats['chart_labels'] = labels
+    stats['chart_data'] = chart_data
+    
+    return stats
 
 # --- Billing Helpers ---
 
@@ -379,3 +423,79 @@ def get_next_business_receipt_number(business_id: str) -> str:
     )
     seq = result.get('receipt_counter', 1) if result else 1
     return f'#{seq:04d}'
+
+# ---------------------------------------------------------------------------
+# Products & Inventory Helpers
+# ---------------------------------------------------------------------------
+
+def create_product(business_id: str, name: str, total_cost: float, unit_price: float):
+    db = get_db()
+    product_doc = {
+        'business_id': ObjectId(business_id),
+        'name': name.strip(),
+        'total_cost': total_cost,
+        'unit_price': unit_price,
+        'created_at': get_wat_time(),
+        'status': 'active'
+    }
+    result = db.products.insert_one(product_doc)
+    return db.products.find_one({'_id': result.inserted_id})
+
+def get_products(business_id: str, active_only: bool = True):
+    db = get_db()
+    query = {'business_id': ObjectId(business_id)}
+    if active_only:
+        query['status'] = 'active'
+    return list(db.products.find(query).sort('created_at', -1))
+
+def mark_product_sold_out(product_id: str, business_id: str):
+    db = get_db()
+    db.products.update_one(
+        {'_id': ObjectId(product_id), 'business_id': ObjectId(business_id)},
+        {'$set': {'status': 'sold_out'}}
+    )
+
+def delete_product(product_id: str, business_id: str):
+    db = get_db()
+    db.products.delete_one(
+        {'_id': ObjectId(product_id), 'business_id': ObjectId(business_id)}
+    )
+
+def get_product_stats(business_id: str, active_only: bool = False):
+    # Returns a list of products with their total revenue attached
+    db = get_db()
+    products = get_products(business_id, active_only=active_only)
+    if not products:
+        return []
+        
+    # Aggregate total sales for each product
+    pipeline = [
+        {'$match': {'business_id': ObjectId(business_id)}},
+        {'$unwind': '$items'},
+        {'$match': {'items.product_id': {'$exists': True}}},
+        {'$group': {
+            '_id': '$items.product_id',
+            'total_revenue': {'$sum': '$items.total'},
+            'units_sold': {'$sum': '$items.quantity'}
+        }}
+    ]
+    
+    sales_stats = list(db.sales.aggregate(pipeline))
+    stats_map = {stat['_id']: stat for stat in sales_stats}
+    
+    for product in products:
+        stat = stats_map.get(product['_id'], {'total_revenue': 0, 'units_sold': 0})
+        product['total_revenue'] = stat['total_revenue']
+        product['units_sold'] = stat['units_sold']
+        
+        # Calculate progress percentage (up to 100 for the bar)
+        if product['total_cost'] > 0:
+            progress = (product['total_revenue'] / product['total_cost']) * 100
+            product['progress_pct'] = min(progress, 100)
+            product['is_profitable'] = product['total_revenue'] >= product['total_cost']
+        else:
+            product['progress_pct'] = 100
+            product['is_profitable'] = True
+            
+    return products
+

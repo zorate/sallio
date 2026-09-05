@@ -19,10 +19,13 @@ def dashboard():
 @bp.route('/sale/new', methods=['GET', 'POST'])
 @login_required
 def new_sale():
+    from sallio.models import get_products
+    
     if request.method == 'POST':
         item_names = request.form.getlist('item_name[]')
         quantities = request.form.getlist('quantity[]')
         prices = request.form.getlist('price[]')
+        product_ids = request.form.getlist('product_id[]')
         payment_method = request.form.get('payment_method')
         customer_name = request.form.get('customer_name')
         customer_phone = request.form.get('customer_phone')
@@ -30,11 +33,16 @@ def new_sale():
         items = []
         for i in range(len(item_names)):
             if item_names[i].strip():
-                items.append({
+                item_data = {
                     'name': item_names[i],
                     'quantity': quantities[i],
                     'price': prices[i]
-                })
+                }
+                # Safely get product_id if it exists for this row
+                if i < len(product_ids) and product_ids[i].strip():
+                    item_data['product_id'] = product_ids[i].strip()
+                    
+                items.append(item_data)
                 
         try:
             sale = create_sale(
@@ -49,7 +57,8 @@ def new_sale():
         except ValueError as e:
             flash(str(e), 'error')
             
-    return render_template('sale_new.html')
+    products = get_products(current_user.business_id)
+    return render_template('sale_new.html', products=products)
 
 from sallio.models import get_sale, get_sales, get_business
 
@@ -92,3 +101,46 @@ def history():
     sales = get_sales(current_user.business_id)
     business = get_business(current_user.business_id)
     return render_template('history.html', sales=sales, business=business)
+
+@bp.route('/products')
+@login_required
+def products():
+    from sallio.models import get_product_stats
+    products = get_product_stats(current_user.business_id, active_only=False)
+    return render_template('products.html', products=products)
+
+@bp.route('/products/new', methods=['POST'])
+@login_required
+def products_new():
+    from sallio.models import create_product
+    name = request.form.get('name')
+    try:
+        total_cost = float(request.form.get('total_cost', 0))
+        unit_price = float(request.form.get('unit_price', 0))
+    except ValueError:
+        flash('Invalid cost or price values.', 'error')
+        return redirect(url_for('main.products'))
+        
+    if not name:
+        flash('Product name is required.', 'error')
+        return redirect(url_for('main.products'))
+        
+    create_product(current_user.business_id, name, total_cost, unit_price)
+    flash('Product created successfully!', 'success')
+    return redirect(url_for('main.products'))
+
+@bp.route('/products/<product_id>/sold_out', methods=['POST'])
+@login_required
+def product_sold_out(product_id):
+    from sallio.models import mark_product_sold_out
+    mark_product_sold_out(product_id, current_user.business_id)
+    flash('Product marked as sold out.', 'success')
+    return redirect(url_for('main.products'))
+
+@bp.route('/products/<product_id>/delete', methods=['POST'])
+@login_required
+def product_delete(product_id):
+    from sallio.models import delete_product
+    delete_product(product_id, current_user.business_id)
+    flash('Product deleted successfully.', 'success')
+    return redirect(url_for('main.products'))
