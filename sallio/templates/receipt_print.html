@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt {{ sale.receipt_number }} — {{ business.name }}</title>
+    <!-- Vintage Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -11,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             font-size: 11px;
             color: #1a1a1a;
-            background: #fff;
+            background: #f4f4f4;
         }
 
         .receipt-wrap {
@@ -22,7 +26,7 @@
             background: #fff;
         }
 
-        /* Header */
+        /* ── Standard Style ── */
         .rp-header { 
             display: flex; 
             justify-content: space-between; 
@@ -55,7 +59,6 @@
             margin-top: 4px; 
         }
 
-        /* Info Bar */
         .rp-info-bar {
             display: flex;
             gap: 20px;
@@ -66,9 +69,8 @@
         .rp-info-title { font-size: 8px; font-weight: 700; color: #888; text-transform: uppercase; }
         .rp-info-value { font-size: 10px; font-weight: 500; }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
-        th { 
+        table.std-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+        table.std-table th { 
             font-size: 8px; 
             font-weight: 700; 
             text-transform: uppercase; 
@@ -77,19 +79,18 @@
             text-align: right; 
             color: #555;
         }
-        td { 
+        table.std-table td { 
             font-size: 10px; 
             padding: 8px 0; 
             border-bottom: 1px solid #f0f0f0; 
             text-align: right; 
             vertical-align: top;
         }
-        th:first-child, td:first-child { text-align: left; width: 45%; }
-        td:first-child { font-weight: 500; }
+        table.std-table th:first-child, table.std-table td:first-child { text-align: left; width: 45%; }
+        table.std-table td:first-child { font-weight: 500; }
         
         .rp-item-meta { font-size: 9px; color: #888; font-weight: 400; margin-top: 2px; }
 
-        /* Total Section */
         .rp-total-section { 
             display: flex; 
             justify-content: flex-end; 
@@ -106,7 +107,6 @@
             border-top: 1px solid #1a1a1a; 
         }
 
-        /* Footer */
         .rp-footer { 
             display: flex; 
             justify-content: space-between; 
@@ -122,11 +122,122 @@
 
         .rp-powered { text-align: center; font-size: 8px; color: #aaa; margin-top: 8mm; }
 
+        /* ── VINTAGE PRINT STYLES ── */
+        .receipt-wrap--vintage {
+            background: #faf4e8;
+            border: 2px solid #bda376;
+            color: #2b1f14;
+            font-family: "Georgia", "Times New Roman", serif;
+            position: relative;
+            box-shadow: inset 0 0 60px rgba(189, 163, 118, 0.2);
+        }
+        .v-cartouche { text-align: center; margin-bottom: 4mm; }
+        .v-cartouche-svg { width: 85mm; display: block; margin: 0 auto; color: #4a3319; }
+        .v-biz-name {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 14pt;
+            font-weight: 800;
+            color: #2e1e11;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .v-biz-bio { font-style: italic; font-size: 7.5pt; color: #634b35; margin-top: 1mm; }
+        .v-biz-meta { font-size: 7pt; color: #5c4530; margin-top: 1mm; }
+        .v-divider-svg { width: 35mm; display: block; margin: 2mm auto 3mm; color: #8c6d42; }
+
+        .v-info-grid {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px dashed #d1bd99;
+            border-bottom: 1px dashed #d1bd99;
+            padding: 2mm 0;
+            margin-bottom: 4mm;
+            font-size: 7.5pt;
+        }
+        .v-info-label { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 700; color: #2b1d10; margin-bottom: 1mm; }
+        
+        .v-table-frame {
+            border: 1px solid #4a341e;
+            margin-bottom: 4mm;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        table.v-table { width: 100%; border-collapse: collapse; }
+        table.v-table th {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 7pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2.5mm 2mm;
+            border-bottom: 1px solid #4a341e;
+            border-right: 1px solid #c7b390;
+            color: #2e1d10;
+            background: rgba(189, 163, 118, 0.15);
+        }
+        table.v-table th:last-child { border-right: none; }
+        table.v-table td {
+            padding: 2.5mm 2mm;
+            border-bottom: 1px solid #e0d0b8;
+            border-right: 1px solid #e0d0b8;
+            font-size: 7.5pt;
+            color: #2b1f14;
+        }
+        table.v-table td:last-child { border-right: none; }
+        table.v-table tr:last-child td { border-bottom: none; }
+
+        .v-summary-box {
+            padding: 2mm 3mm;
+            border-top: 1px solid #4a341e;
+            background: rgba(189, 163, 118, 0.12);
+        }
+        .v-summary-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6mm;
+            font-size: 7.5pt;
+            color: #4a3826;
+            margin-bottom: 1mm;
+        }
+        .v-summary-row.total-row {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 10pt;
+            font-weight: 800;
+            color: #241407;
+            border-top: 1px solid #7c603b;
+            padding-top: 1.5mm;
+            margin-top: 1.5mm;
+        }
+
+        .v-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 2mm;
+        }
+        .v-terms-title { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 8pt; font-weight: 700; color: #382414; margin-bottom: 1mm; }
+        .v-terms-body { font-size: 7pt; color: #57412e; line-height: 1.4; }
+
+        .v-sig-area { text-align: center; }
+        .v-sig-img { max-height: 25px; max-width: 80px; object-fit: contain; margin: 0 auto 1mm; display: block; }
+        .v-sig-line { width: 30mm; border-top: 1px solid #4a341e; margin: 1mm auto; }
+        .v-sig-label { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 7pt; color: #4a341e; }
+
+        .v-powered {
+            text-align: center;
+            font-size: 6.5pt;
+            font-style: italic;
+            color: #8c7356;
+            margin-top: 4mm;
+            border-top: 1px dotted #c9b493;
+            padding-top: 2mm;
+        }
+        .v-powered strong { font-family: 'Cinzel', sans-serif; font-style: normal; color: #4a341e; }
+
         /* Print chrome removal */
         @media print {
             @page { size: A5 portrait; margin: 0; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff; }
             .no-print { display: none !important; }
+            .receipt-wrap { margin: 0 auto; box-shadow: none; }
         }
     </style>
 </head>
@@ -142,6 +253,124 @@
     <p style="color:#aaa; font-size:12px; margin-top:8px;">In the print dialog, choose "Save as PDF" to download.</p>
 </div>
 
+{% if business.plan_type == 'premium' %}
+<!-- ══════════════════════════════════════════════
+     VINTAGE PRINT TEMPLATE (PREMIUM)
+══════════════════════════════════════════════ -->
+<div class="receipt-wrap receipt-wrap--vintage">
+    <div class="v-cartouche">
+        <svg class="v-cartouche-svg" viewBox="0 0 500 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M250,55 C210,55 180,35 150,35 C110,35 80,60 50,45 C30,35 20,15 40,10 C60,5 75,25 95,25 C115,25 125,10 145,10 C165,10 175,28 200,28 C225,28 235,15 250,15 C265,15 275,28 300,28 C325,28 335,10 355,10 C375,10 385,25 405,25 C425,25 440,5 460,10 C480,15 470,35 450,45 C420,60 390,35 350,35 C320,35 290,55 250,55 Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M250,68 C220,68 190,50 160,50 C130,50 100,70 70,60 C50,53 45,35 60,30 C75,25 85,42 105,42 C125,42 135,28 155,28 C175,28 185,45 210,45 C235,45 242,32 250,32 C258,32 265,45 290,45 C315,45 325,28 345,28 C365,28 375,42 395,42 C415,42 425,25 440,30 C455,35 450,53 430,60 C400,70 370,50 340,50 C310,50 280,68 250,68 Z" stroke="currentColor" stroke-width="0.8" stroke-dasharray="3 2"/>
+            <circle cx="250" cy="15" r="3" fill="currentColor"/>
+        </svg>
+
+        {% if business.logo_file_id %}
+        <img src="{{ url_for('uploads.serve', file_id=business.logo_file_id, _external=True) }}" alt="Logo" style="max-height: 25px; max-width: 80px; object-fit: contain; margin: 1mm auto; display: block;">
+        {% endif %}
+
+        <div class="v-biz-name">{{ business.name }}</div>
+        {% if business.bio %}
+        <div class="v-biz-bio">{{ business.bio }}</div>
+        {% endif %}
+
+        <div class="v-biz-meta">
+            {% set ho = business.head_office %}
+            {% if ho and ho.address %}
+                <div>{{ ho.address }}{% if ho.city or ho.state %}, {{ ho.city }} {{ ho.state }}{% endif %}</div>
+            {% endif %}
+            {% if business.display_phone %}
+                <div>Tel: {{ business.display_phone }}</div>
+            {% endif %}
+        </div>
+
+        <svg class="v-divider-svg" viewBox="0 0 200 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="10" x2="80" y2="10" stroke="currentColor" stroke-width="1"/>
+            <circle cx="100" cy="10" r="4" stroke="currentColor" stroke-width="1.2" fill="none"/>
+            <line x1="120" y1="10" x2="190" y2="10" stroke="currentColor" stroke-width="1"/>
+        </svg>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="v-info-grid">
+        <div>
+            <div class="v-info-label">Bill To</div>
+            <div><strong>{{ sale.customer_name or 'Valued Customer' }}</strong></div>
+            {% if sale.customer_phone %}<div>{{ sale.customer_phone }}</div>{% endif %}
+        </div>
+        <div>
+            <div class="v-info-label">Payment Method</div>
+            <div>{{ sale.payment_method }} [ PAID ]</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="v-info-label">Receipt Details</div>
+            <div>No. <strong>{{ sale.receipt_number }}</strong></div>
+            <div>Date: {{ sale.date.strftime('%d/%m/%Y') }}</div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="v-table-frame">
+        <table class="v-table">
+            <thead>
+                <tr>
+                    <th style="width: 25px; text-align: center;">Qty</th>
+                    <th style="text-align: left;">Description</th>
+                    <th style="width: 28mm; text-align: right;">Unit Price (₦)</th>
+                    <th style="width: 28mm; text-align: right;">Amount (₦)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sale['items'] %}
+                <tr>
+                    <td style="text-align: center; font-weight: 600;">{{ item.quantity }}</td>
+                    <td><strong>{{ item.name }}</strong></td>
+                    <td style="text-align: right;">{{ "{:,.2f}".format(item.price) }}</td>
+                    <td style="text-align: right; font-weight: 600;">{{ "{:,.2f}".format(item.total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="v-summary-box">
+            <div class="v-summary-row">
+                <span>Subtotal:</span>
+                <span>₦{{ "{:,.2f}".format(sale.total) }}</span>
+            </div>
+            <div class="v-summary-row total-row">
+                <span>RECEIPT TOTAL:</span>
+                <span>₦{{ "{:,.2f}".format(sale.total) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="v-footer">
+        <div class="v-terms">
+            <div class="v-terms-title">Terms & Conditions</div>
+            <div class="v-terms-body">
+                Goods received in good condition.<br>
+                Thank you for your patronage!
+            </div>
+        </div>
+        <div class="v-sig-area">
+            {% if business.signature_file_id %}
+                <img src="{{ url_for('uploads.serve', file_id=business.signature_file_id, _external=True) }}" alt="Signature" class="v-sig-img">
+            {% else %}
+                <div style="height: 18px;"></div>
+            {% endif %}
+            <div class="v-sig-line"></div>
+            <div class="v-sig-label">Authorised Signature</div>
+        </div>
+    </div>
+
+    <div class="v-powered">
+        Powered by <strong>Sallio</strong> &middot; Digital Notebook &amp; Receipts
+    </div>
+</div>
+{% else %}
+<!-- ══════════════════════════════════════════════
+     STANDARD FREE PRINT TEMPLATE
+══════════════════════════════════════════════ -->
 <div class="receipt-wrap">
 
     <!-- HEADER -->
@@ -204,7 +433,7 @@
     </div>
 
     <!-- ITEMS TABLE -->
-    <table>
+    <table class="std-table">
         <thead>
             <tr>
                 <th>Item / Description</th>
@@ -262,6 +491,14 @@
 
     <div class="rp-powered">Powered by Sallio ⚡</div>
 </div>
+{% endif %}
+
+<script>
+    // Auto-trigger print dialog when opened in new tab
+    window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+</script>
+</body>
+</html>
 
 <script>
     // Auto-trigger print dialog when opened in new tab

@@ -678,6 +678,252 @@ footer p { margin: 0; color: var(--text-secondary); }
   box-shadow: 0 4px 16px rgba(0,0,0,0.04);
   margin-bottom: 24px;
   color: #1a1a1a;
+  position: relative;
+}
+
+/* ════════════════════════════════════════════════════════════
+   VINTAGE ANTIQUE PARCHMENT — PREMIUM RECEIPT TEMPLATE
+════════════════════════════════════════════════════════════ */
+.receipt-card--vintage {
+  background: #faf4e8 !important;
+  background-image: 
+    radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.5) 0%, rgba(235, 222, 195, 0.4) 100%),
+    radial-gradient(circle at 10% 90%, rgba(210, 185, 140, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(210, 185, 140, 0.25) 0%, transparent 40%);
+  border: 2px solid #bda376 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 30px rgba(78, 52, 21, 0.12), inset 0 0 80px rgba(189, 163, 118, 0.22) !important;
+  color: #2b1f14 !important;
+  font-family: "Georgia", "Times New Roman", serif !important;
+  padding: 16px 20px 24px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Corner Antique Flourish Ornaments */
+.receipt-card--vintage::before,
+.receipt-card--vintage::after {
+  content: "❧";
+  position: absolute;
+  font-size: 20px;
+  color: #9c7b4a;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.receipt-card--vintage::before {
+  top: 8px;
+  left: 12px;
+}
+.receipt-card--vintage::after {
+  bottom: 8px;
+  right: 12px;
+  transform: rotate(180deg);
+}
+
+.vintage-cartouche {
+  text-align: center;
+  padding: 10px 16px 8px;
+  margin: 0 auto 12px;
+  max-width: 520px;
+  position: relative;
+}
+.vintage-cartouche-svg {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  color: #4a3319;
+}
+.vintage-biz-name {
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #2e1e11;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.vintage-biz-bio {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: #634b35;
+  margin-top: 4px;
+}
+.vintage-biz-meta {
+  font-size: 12px;
+  color: #5c4530;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.vintage-divider-svg {
+  display: block;
+  margin: 12px auto 16px;
+  width: 160px;
+  height: auto;
+  color: #8c6d42;
+}
+
+.vintage-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  border-top: 1px dashed #d1bd99;
+  border-bottom: 1px dashed #d1bd99;
+}
+@media (max-width: 600px) {
+  .vintage-info-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+.vintage-info-label {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2b1d10;
+  margin-bottom: 4px;
+}
+.vintage-info-val {
+  color: #3d2b1a;
+  line-height: 1.4;
+}
+
+.vintage-table-frame {
+  border: 1.5px solid #4a341e;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px 0;
+  background: rgba(255, 255, 255, 0.4);
+}
+.vintage-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.vintage-table th {
+  border-bottom: 1.5px solid #4a341e;
+  border-right: 1px solid #c7b390;
+  padding: 10px 12px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #2e1d10;
+  background: rgba(189, 163, 118, 0.15);
+}
+.vintage-table th:last-child {
+  border-right: none;
+}
+.vintage-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0d0b8;
+  border-right: 1px solid #e0d0b8;
+  font-size: 13px;
+  color: #2b1f14;
+}
+.vintage-table td:last-child {
+  border-right: none;
+}
+.vintage-table tr:last-child td {
+  border-bottom: none;
+}
+
+.vintage-summary-box {
+  padding: 12px 16px;
+  border-top: 1.5px solid #4a341e;
+  background: rgba(189, 163, 118, 0.12);
+}
+.vintage-summary-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 32px;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #4a3826;
+}
+.vintage-summary-row.total-row {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #241407;
+  border-top: 1px solid #7c603b;
+  padding-top: 8px;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.vintage-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 16px 8px 0;
+  flex-wrap: wrap;
+}
+.vintage-terms {
+  flex: 1;
+  min-width: 200px;
+}
+.vintage-terms-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 700;
+  color: #382414;
+  margin-bottom: 4px;
+}
+.vintage-terms-body {
+  font-size: 12px;
+  color: #57412e;
+  line-height: 1.5;
+}
+
+.vintage-signature-box {
+  text-align: center;
+  min-width: 160px;
+}
+.vintage-signature-img {
+  max-height: 50px;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 4px;
+}
+.vintage-signature-line {
+  width: 150px;
+  border-top: 1px solid #4a341e;
+  margin: 4px auto;
+}
+.vintage-signature-label {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: #4a341e;
+}
+
+.vintage-powered {
+  text-align: center;
+  font-size: 11px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: #8c7356;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dotted #c9b493;
+  letter-spacing: 0.3px;
+}
+.vintage-powered strong {
+  font-family: 'Cinzel', -apple-system, sans-serif;
+  font-style: normal;
+  letter-spacing: 1px;
+  color: #4a341e;
 }
 
 /* Header */
