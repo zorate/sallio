@@ -15,7 +15,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2.6">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.2">
 
     <!-- SEO & Meta -->
     <meta name="description" content="{% block meta_description %}Sallio — Simple sales records and digital receipts for small businesses. Sell. Record. Receipt.{% endblock %}">
@@ -26,7 +26,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Sallio">
     
-    <!-- Theme Detection -->
+    <!-- Theme Detection (before paint to avoid flash) -->
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
@@ -36,6 +36,7 @@
 <body>
     <!-- Accessibility: skip to main content -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <!-- Hidden flash data for JS toast bridge -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -48,41 +49,39 @@
     {% endwith %}
 
     <div class="container {% if request.endpoint == 'main.index' %}landing-container{% endif %}">
+
+        <!-- ═══════════════════════════════════════════════════
+             TOP NAV (desktop + logged-out mobile)
+        ════════════════════════════════════════════════════ -->
         <nav class="navbar" aria-label="Main navigation">
             <a href="{{ url_for('main.index') }}" class="navbar-brand">
                 <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Sallio" width="32" height="32">
                 <span class="brand-text">SALLIO</span>
             </a>
-            
-            <button class="menu-toggle" id="mobile-menu-btn" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-links">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
 
-            <div class="nav-links" id="nav-links" role="list">
-                {% if current_user.is_authenticated %}
-                    {% set business = get_business(current_user.business_id) %}
-                    <a href="{{ url_for('main.dashboard') }}" class="nav-link" role="listitem">Dashboard</a>
-                    <a href="{{ url_for('main.new_sale') }}" class="nav-link nav-primary" role="listitem">+ New Sale</a>
-                    <a href="{{ url_for('main.products') }}" class="nav-link" role="listitem">Products</a>
-                    <a href="{{ url_for('main.history') }}" class="nav-link" role="listitem">History</a>
-                    <a href="{{ url_for('settings.index') }}" class="nav-link" role="listitem">⚙ Settings</a>
-                    {% if not business or business.get('plan_type') != 'premium' %}
-                        <a href="{{ url_for('billing.upgrade') }}" class="nav-link" style="color:#d35400; border-color:#e67e22;" role="listitem">⭐ Upgrade</a>
-                    {% endif %}
-                    <a href="{{ url_for('auth.logout') }}" class="nav-link nav-danger" role="listitem">Log out</a>
-                {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="nav-link" role="listitem">Log in</a>
-                    <a href="{{ url_for('auth.register') }}" class="nav-link nav-primary" role="listitem">Get Started →</a>
+            {% if current_user.is_authenticated %}
+            <!-- Desktop nav links -->
+            <div class="nav-links nav-links--desktop" id="nav-links-desktop">
+                {% set ep = request.endpoint %}
+                <a href="{{ url_for('main.dashboard') }}"  class="nav-link {% if ep == 'main.dashboard' %}nav-link--active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('main.new_sale') }}"   class="nav-link nav-primary">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  New Sale
+                </a>
+                <a href="{{ url_for('main.products') }}"   class="nav-link {% if ep == 'main.products' or ep == 'main.new_product' %}nav-link--active{% endif %}">Products</a>
+                <a href="{{ url_for('main.history') }}"    class="nav-link {% if ep == 'main.history' %}nav-link--active{% endif %}">History</a>
+                <a href="{{ url_for('settings.index') }}"  class="nav-link {% if ep and ep.startswith('settings') %}nav-link--active{% endif %}">Settings</a>
+                {% if not get_business(current_user.business_id) or get_business(current_user.business_id).get('plan_type') != 'premium' %}
+                <a href="{{ url_for('billing.upgrade') }}" class="nav-link nav-upgrade">Upgrade</a>
                 {% endif %}
-                <button id="theme-toggle" class="nav-link" style="background:transparent; border:none; cursor:pointer; display:flex; align-items:center; padding: 8px; color: var(--text-primary);" title="Toggle Dark Mode">
-                    <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                    <svg id="theme-icon-sun" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                </button>
+                <a href="{{ url_for('auth.logout') }}" class="nav-link nav-danger">Log out</a>
             </div>
+            {% else %}
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('auth.login') }}"    class="nav-link">Log in</a>
+                <a href="{{ url_for('auth.register') }}" class="nav-link nav-primary">Get Started →</a>
+            </div>
+            {% endif %}
         </nav>
 
         <main id="main-content">
@@ -94,47 +93,54 @@
         </footer>
     </div>
 
-    <!-- Core JS — loaded last so DOM is ready -->
+    <!-- ═══════════════════════════════════════════════════
+         MOBILE BOTTOM TAB BAR (authenticated users only)
+    ════════════════════════════════════════════════════ -->
+    {% if current_user.is_authenticated %}
+    {% set ep = request.endpoint %}
+    <nav class="bottom-tab-bar" aria-label="Mobile navigation">
+
+        <a href="{{ url_for('main.dashboard') }}" class="btab {% if ep == 'main.dashboard' %}btab--active{% endif %}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{{ url_for('main.history') }}" class="btab {% if ep == 'main.history' %}btab--active{% endif %}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>History</span>
+        </a>
+
+        <!-- Centre FAB -->
+        <a href="{{ url_for('main.new_sale') }}" class="btab btab--fab" aria-label="New Sale">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </a>
+
+        <a href="{{ url_for('main.products') }}" class="btab {% if ep == 'main.products' or ep == 'main.new_product' %}btab--active{% endif %}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <span>Products</span>
+        </a>
+
+        <a href="{{ url_for('settings.index') }}" class="btab {% if ep and ep.startswith('settings') %}btab--active{% endif %}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Settings</span>
+        </a>
+
+    </nav>
+    {% endif %}
+
+    <!-- Core JS -->
     <script src="{{ url_for('static', filename='js/sallio.js') }}?v=2.0"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.getElementById('mobile-menu-btn');
-            const navLinks = document.getElementById('nav-links');
-            
-            if (menuBtn && navLinks) {
-                menuBtn.addEventListener('click', () => {
-                    const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
-                    menuBtn.setAttribute('aria-expanded', !isExpanded);
-                    navLinks.classList.toggle('active');
-                });
-            }
-            
-            const themeBtn = document.getElementById('theme-toggle');
-            if (themeBtn) {
-                const iconMoon = document.getElementById('theme-icon-moon');
-                const iconSun = document.getElementById('theme-icon-sun');
-                
-                const currentTheme = localStorage.getItem('theme');
-                if (currentTheme === 'dark') {
-                    iconMoon.style.display = 'none';
-                    iconSun.style.display = 'block';
-                }
-                themeBtn.addEventListener('click', () => {
-                    let theme = localStorage.getItem('theme');
-                    if (theme === 'dark') {
-                        document.documentElement.removeAttribute('data-theme');
-                        localStorage.setItem('theme', 'light');
-                        iconMoon.style.display = 'block';
-                        iconSun.style.display = 'none';
-                    } else {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                        localStorage.setItem('theme', 'dark');
-                        iconMoon.style.display = 'none';
-                        iconSun.style.display = 'block';
-                    }
-                });
-            }
-        });
+    window.applySallioTheme = function(theme) {
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
+        window.dispatchEvent(new CustomEvent('themechanged', { detail: { theme: theme } }));
+    };
     </script>
     {% block extra_js %}{% endblock %}
 </body>

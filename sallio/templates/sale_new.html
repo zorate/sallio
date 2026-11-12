@@ -21,7 +21,7 @@
 
         <div id="items-container">
             <!-- First Item — cannot be removed -->
-            <div class="item-row" style="background: #fff; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+            <div class="item-row" style="background: var(--surface-color); padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
                 <input type="hidden" name="product_id[]" class="product-id-input" value="">
                 <div class="form-field">
                     <label>Item Name</label>
@@ -39,7 +39,7 @@
                     </div>
                     <div style="flex: 2;">
                         <div class="form-field" style="margin-bottom: 0;">
-                            <label>Price (₦)</label>
+                            <label>Price (&#8358;)</label>
                             <input class="form-input price-input" type="number"
                                    name="price[]" min="0" step="0.01" required
                                    placeholder="0.00" inputmode="decimal">
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function makeItemRow() {
         const row = document.createElement('div');
         row.className = 'item-row';
-        row.style.cssText = 'background:#fff; padding:12px; border:1px solid var(--border-color); border-radius:8px; margin-bottom:12px; position:relative;';
+        row.style.cssText = 'background:var(--surface-color); padding:12px; border:1px solid var(--border-color); border-radius:8px; margin-bottom:12px; position:relative;';
         row.innerHTML = `
             <button type="button" class="remove-btn"
                 aria-label="Remove item"

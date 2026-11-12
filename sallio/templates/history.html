@@ -10,15 +10,14 @@
     </div>
 
     {% if not business.signature_file_id %}
-    <div style="background: #fff8e1; border: 1px solid #ffecb3; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 200px;">
-            <div style="font-size: 24px;">✍️</div>
-            <div>
-                <h4 style="margin: 0; color: #b78103; font-size: 15px; margin-bottom: 2px;">Build Trust</h4>
-                <p style="margin: 0; color: #8f6a00; font-size: 13px;">Add a signature to your receipts.</p>
-            </div>
+    <div class="dash-nudge" style="margin-bottom: 24px;">
+        <div class="dash-nudge__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         </div>
-        <a href="{{ url_for('settings.index') }}" class="btn btn-sm" style="background: #ffc107; color: #000; border: none; padding: 8px 16px; white-space: nowrap;">Add Signature</a>
+        <div class="dash-nudge__text">
+            <strong>Build Trust</strong> — Add a signature to your receipts.
+        </div>
+        <a href="{{ url_for('settings.index') }}" class="dash-nudge__btn">Add Signature</a>
     </div>
     {% endif %}
 
@@ -26,11 +25,11 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
             {% for sale in sales %}
             <a href="{{ url_for('main.receipt', receipt_number=sale.receipt_number) }}" style="text-decoration: none; color: inherit;">
-                <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; transition: transform 0.1s ease, box-shadow 0.1s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="stat-card" style="padding: 16px; margin-bottom: 0;">
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 500; color: var(--text-primary);">{{ sale.receipt_number }}</span>
-                        <span style="font-weight: 600; color: var(--primary-color);">₦{{ "{:,.2f}".format(sale.total) }}</span>
+                        <span style="font-weight: 600; color: var(--text-primary);">{{ sale.receipt_number }}</span>
+                        <span style="font-weight: 700; color: var(--primary-color);">&#8358;{{ "{:,.2f}".format(sale.total) }}</span>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary);">
@@ -39,7 +38,7 @@
                     </div>
 
                     {% if sale.customer_name %}
-                    <div style="margin-top: 8px; font-size: 13px; color: var(--text-secondary); border-top: 1px solid #f0f0f0; padding-top: 8px;">
+                    <div style="margin-top: 8px; font-size: 13px; color: var(--text-secondary); border-top: 1px solid var(--border-color); padding-top: 8px;">
                         Customer: {{ sale.customer_name }}
                     </div>
                     {% endif %}
