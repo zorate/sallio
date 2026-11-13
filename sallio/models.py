@@ -291,7 +291,7 @@ def upgrade_to_premium(business_id, reference, subscription_code=None, customer_
         'plan_type': 'premium',
         'subscription_status': 'active',
         'paystack_reference': reference,
-        'updated_at': datetime.utcnow()
+        'updated_at': datetime.datetime.utcnow()
     }
     if subscription_code:
         update_fields['paystack_subscription_code'] = subscription_code
@@ -313,7 +313,7 @@ def downgrade_to_free(business_id, reason="Subscription lapsed or cancelled"):
                 'plan_type': 'free',
                 'subscription_status': 'inactive',
                 'downgrade_reason': reason,
-                'updated_at': datetime.utcnow()
+                'updated_at': datetime.datetime.utcnow()
             }
         }
     )
