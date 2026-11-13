@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.4">
 
     <!-- SEO & Meta -->
     <meta name="description" content="{% block meta_description %}Sallio — Simple sales records and digital receipts for small businesses. Sell. Record. Receipt.{% endblock %}">
@@ -56,7 +56,7 @@
     <div class="container {% if request.endpoint == 'main.index' %}landing-container{% endif %}">
 
         <!-- ═══════════════════════════════════════════════════
-             TOP NAV (desktop + logged-out mobile)
+             TOP NAV (desktop + mobile)
         ════════════════════════════════════════════════════ -->
         <nav class="navbar" aria-label="Main navigation">
             <a href="{{ url_for('main.index') }}" class="navbar-brand">
@@ -67,7 +67,7 @@
             {% if current_user.is_authenticated %}
             {% set business = get_business(current_user.business_id) %}
             
-            <!-- Mobile Top Right Quick Actions (visible on mobile only) -->
+            <!-- Mobile Top Right Quick Actions (authenticated users) -->
             <div class="mobile-nav-actions">
                 {% if not business or business.get('plan_type') != 'premium' %}
                 <a href="{{ url_for('billing.upgrade') }}" class="mobile-upgrade-pill" title="Upgrade to Premium">
@@ -97,9 +97,16 @@
                 <a href="{{ url_for('auth.logout') }}" class="nav-link nav-danger">Log out</a>
             </div>
             {% else %}
-            <div class="nav-links" id="nav-links">
-                <a href="{{ url_for('auth.login') }}"    class="nav-link">Log in</a>
-                <a href="{{ url_for('auth.register') }}" class="nav-link nav-primary">Get Started →</a>
+            <!-- Unauthenticated Top Navigation (both desktop and mobile) -->
+            <div class="nav-links nav-links--unauth">
+                <a href="{{ url_for('auth.login') }}" class="nav-link nav-login-link">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <span>Log in</span>
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="nav-link nav-primary nav-cta-pill">
+                    <span>Get Started</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
             </div>
             {% endif %}
         </nav>

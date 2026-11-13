@@ -176,29 +176,37 @@ main {
   flex: 1;
 }
 
-/* Navbar Styles */
+/* Navbar Styles (Refined Floating Pill Glassmorphic Pattern) */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 16px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 10px 18px;
+  margin: 12px auto 24px;
+  max-width: 1160px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 1000;
-  background: var(--surface-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  transition: all 0.25s ease;
 }
 [data-theme="dark"] .navbar {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  background: rgba(28, 28, 30, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 10px 32px 0 rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .navbar-brand {
   display: flex;
   align-items: center;
   text-decoration: none;
   font-weight: 800;
-  font-size: 20px;
+  font-size: 19px;
   color: var(--primary-color);
   letter-spacing: -0.5px;
   gap: 8px;
@@ -206,14 +214,54 @@ main {
 .navbar-brand img {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .nav-links {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
+}
+.nav-links--unauth {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+.nav-login-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.nav-login-link:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+[data-theme="dark"] .nav-login-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.nav-cta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.nav-cta-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.4);
 }
 .nav-link {
   text-decoration: none;
@@ -1572,26 +1620,32 @@ footer p { margin: 0; color: var(--text-secondary); }
 }
 
 /* ============================================================
-   BOTTOM TAB BAR (mobile nav — v3.0)
+   BOTTOM TAB BAR (Mobile Glassmorphic Floating Pill — v3.4)
 ============================================================ */
 .bottom-tab-bar {
   display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  background: var(--surface-color);
-  border-top: 1px solid var(--border-color);
+  bottom: 14px;
+  left: 16px;
+  right: 16px;
+  height: 62px;
+  max-width: 440px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
   z-index: 2000;
-  padding: 0 8px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding: 0 10px;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.85);
 }
 [data-theme="dark"] .bottom-tab-bar {
-  box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
+  background: rgba(28, 28, 30, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .btab {
@@ -1606,9 +1660,10 @@ footer p { margin: 0; color: var(--text-secondary); }
   color: var(--text-secondary);
   font-size: 10px;
   font-weight: 500;
-  transition: color 0.15s;
+  transition: all 0.15s ease;
   min-width: 44px;
   padding: 0 4px;
+  border-radius: 999px;
 }
 .btab span {
   font-size: 10px;
@@ -1620,6 +1675,7 @@ footer p { margin: 0; color: var(--text-secondary); }
 }
 .btab--active svg {
   stroke-width: 2.5;
+  transform: translateY(-1px);
 }
 
 /* Centre FAB button */
@@ -1627,20 +1683,20 @@ footer p { margin: 0; color: var(--text-secondary); }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
   background: var(--primary-color);
   color: #fff !important;
   border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(46,125,50,0.4);
-  margin-bottom: 8px;
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.45);
+  margin-bottom: 4px;
   transition: transform 0.15s, box-shadow 0.15s;
   flex: none;
 }
 .btab--fab:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(46,125,50,0.5);
+  box-shadow: 0 8px 22px rgba(46, 125, 50, 0.55);
   color: #fff !important;
 }
 
