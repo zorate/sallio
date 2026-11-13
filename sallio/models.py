@@ -285,15 +285,35 @@ def increment_receipt_quota(business_id):
         )
     return True
 
-def upgrade_to_premium(business_id, reference):
+def upgrade_to_premium(business_id, reference, subscription_code=None, customer_code=None):
+    db = get_db()
+    update_fields = {
+        'plan_type': 'premium',
+        'subscription_status': 'active',
+        'paystack_reference': reference,
+        'updated_at': datetime.utcnow()
+    }
+    if subscription_code:
+        update_fields['paystack_subscription_code'] = subscription_code
+    if customer_code:
+        update_fields['paystack_customer_code'] = customer_code
+
+    db.businesses.update_one(
+        {'_id': ObjectId(business_id)},
+        {'$set': update_fields}
+    )
+    return True
+
+def downgrade_to_free(business_id, reason="Subscription lapsed or cancelled"):
     db = get_db()
     db.businesses.update_one(
         {'_id': ObjectId(business_id)},
         {
             '$set': {
-                'plan_type': 'premium',
-                'subscription_status': 'active',
-                'paystack_reference': reference
+                'plan_type': 'free',
+                'subscription_status': 'inactive',
+                'downgrade_reason': reason,
+                'updated_at': datetime.utcnow()
             }
         }
     )

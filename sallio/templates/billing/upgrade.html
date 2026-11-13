@@ -54,15 +54,25 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script>
 function payWithPaystack() {
-    let handler = PaystackPop.setup({
+    const planCode = '{{ paystack_plan_code }}';
+    const setupConfig = {
         key: '{{ paystack_public_key }}',
         email: '{{ user_email }}',
-        amount: 1500 * 100, // Amount is in kobo
+        amount: 1500 * 100, // 1,500 NGN in kobo
         currency: 'NGN',
         ref: 'SALLIO_' + Math.floor((Math.random() * 1000000000) + 1),
+        metadata: {
+            business_id: '{{ business_id }}',
+            custom_fields: [
+                {
+                    display_name: "Business ID",
+                    variable_name: "business_id",
+                    value: '{{ business_id }}'
+                }
+            ]
+        },
         callback: function(response) {
-            // Payment success! Verify on backend
-            Sallio.toast('Payment complete! Verifying...', 'info');
+            Sallio.toast('Payment complete! Verifying subscription...', 'info');
             
             fetch("{{ url_for('billing.verify') }}", {
                 method: 'POST',
@@ -74,10 +84,10 @@ function payWithPaystack() {
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    Sallio.success('Welcome to Premium!');
+                    Sallio.success('Welcome to Premium! Monthly subscription active.');
                     setTimeout(() => {
                         window.location.href = "{{ url_for('main.dashboard') }}";
-                    }, 2000);
+                    }, 1800);
                 } else {
                     Sallio.error('Verification failed. Please contact support.');
                 }
@@ -89,7 +99,14 @@ function payWithPaystack() {
         onClose: function() {
             Sallio.toast('Payment cancelled.', 'info');
         }
-    });
+    };
+
+    // If a Paystack recurring Plan Code is provided in env, attach it
+    if (planCode && planCode.trim() !== '') {
+        setupConfig.plan = planCode.trim();
+    }
+
+    let handler = PaystackPop.setup(setupConfig);
     handler.openIframe();
 }
 </script>

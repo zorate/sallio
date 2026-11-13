@@ -1,9 +1,19 @@
 import os
+import hmac
+import hashlib
 import requests
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
+from bson import ObjectId
 from sallio.billing import bp
-from sallio.models import get_business, upgrade_to_premium, can_generate_receipt, increment_receipt_quota
+from sallio.models import (
+    get_db,
+    get_business,
+    upgrade_to_premium,
+    downgrade_to_free,
+    can_generate_receipt,
+    increment_receipt_quota
+)
 
 @bp.route('/upgrade')
 @login_required
@@ -14,12 +24,20 @@ def upgrade():
         return redirect(url_for('main.dashboard'))
         
     paystack_public_key = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
-    return render_template('billing/upgrade.html', paystack_public_key=paystack_public_key, user_email=current_user.email or f"{current_user.phone}@sallio.app")
+    paystack_plan_code = os.environ.get('PAYSTACK_PLAN_CODE', '')
+    
+    return render_template(
+        'billing/upgrade.html',
+        paystack_public_key=paystack_public_key,
+        paystack_plan_code=paystack_plan_code,
+        user_email=current_user.email or f"{current_user.phone}@sallio.app",
+        business_id=str(current_user.business_id)
+    )
 
 @bp.route('/verify', methods=['POST'])
 @login_required
 def verify():
-    data = request.json
+    data = request.json or {}
     reference = data.get('reference')
     if not reference:
         return jsonify({'status': 'error', 'message': 'No reference provided'}), 400
@@ -34,12 +52,23 @@ def verify():
     }
     
     try:
-        response = requests.get(f'https://api.paystack.co/transaction/verify/{reference}', headers=headers)
+        response = requests.get(f'https://api.paystack.co/transaction/verify/{reference}', headers=headers, timeout=10)
         response_data = response.json()
         
-        if response_data.get('status') and response_data['data']['status'] == 'success':
-            # Verification successful, upgrade the business
-            upgrade_to_premium(current_user.business_id, reference)
+        if response_data.get('status') and response_data.get('data', {}).get('status') == 'success':
+            tx_data = response_data['data']
+            # Extract subscription / customer info if created
+            plan_object = tx_data.get('plan_object') or {}
+            subscription_code = plan_object.get('subscriptions', [{}])[0].get('subscription_code') if plan_object.get('subscriptions') else None
+            customer_code = tx_data.get('customer', {}).get('customer_code')
+            
+            # Upgrade business
+            upgrade_to_premium(
+                current_user.business_id,
+                reference=reference,
+                subscription_code=subscription_code,
+                customer_code=customer_code
+            )
             return jsonify({'status': 'success'})
         else:
             return jsonify({'status': 'error', 'message': 'Payment verification failed'}), 400
@@ -56,24 +85,66 @@ def track_receipt():
     else:
         return jsonify({'status': 'error', 'message': 'Quota exceeded'}), 403
 
-import hmac
-import hashlib
-
 @bp.route('/webhook', methods=['POST'])
 def webhook():
-    # Paystack sends the signature in the x-paystack-signature header
     paystack_signature = request.headers.get('x-paystack-signature')
     secret_key = os.environ.get('PAYSTACK_SECRET_KEY', '')
     
-    # Verify the signature
+    if not secret_key:
+        return jsonify({'status': 'error', 'message': 'Webhook secret not configured'}), 500
+
     hash_obj = hmac.new(secret_key.encode('utf-8'), request.data, hashlib.sha512)
     if hash_obj.hexdigest() != paystack_signature:
         return jsonify({'status': 'error', 'message': 'Invalid signature'}), 400
 
-    event = request.json
-    # Handle subscription events (charge.success, subscription.create, etc.)
-    # In a full implementation, this updates the subscription status in the DB
-    # For now, just return 200 to acknowledge receipt
-    
+    payload = request.json or {}
+    event = payload.get('event')
+    data = payload.get('data', {})
+    db = get_db()
+
+    # 1. Recurring charge succeeded
+    if event == 'charge.success':
+        customer_code = data.get('customer', {}).get('customer_code')
+        reference = data.get('reference')
+        metadata = data.get('metadata') or {}
+        business_id = metadata.get('business_id')
+
+        # Find business by metadata or customer code
+        business = None
+        if business_id:
+            try:
+                business = db.businesses.find_one({'_id': ObjectId(business_id)})
+            except Exception:
+                pass
+        if not business and customer_code:
+            business = db.businesses.find_one({'paystack_customer_code': customer_code})
+
+        if business:
+            upgrade_to_premium(business['_id'], reference=reference, customer_code=customer_code)
+
+    # 2. Subscription disabled / cancelled
+    elif event in ('subscription.disable', 'subscription.not_renew'):
+        sub_code = data.get('subscription_code')
+        customer_code = data.get('customer', {}).get('customer_code')
+
+        query = {}
+        if sub_code:
+            query = {'paystack_subscription_code': sub_code}
+        elif customer_code:
+            query = {'paystack_customer_code': customer_code}
+
+        if query:
+            biz = db.businesses.find_one(query)
+            if biz:
+                downgrade_to_free(biz['_id'], reason=f"Subscription cancelled ({event})")
+
+    # 3. Invoice payment failed (card expired, insufficient funds, etc.)
+    elif event == 'invoice.payment_failed':
+        customer_code = data.get('customer', {}).get('customer_code')
+        if customer_code:
+            biz = db.businesses.find_one({'paystack_customer_code': customer_code})
+            if biz:
+                downgrade_to_free(biz['_id'], reason="Monthly recurring charge failed")
+
     return jsonify({'status': 'success'}), 200
 
