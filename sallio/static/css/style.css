@@ -224,22 +224,30 @@ main {
   gap: 8px;
   align-items: center;
 }
+/* Unauthenticated Navigation Links */
 .nav-links--unauth {
   display: flex !important;
   align-items: center;
   gap: 8px;
+  position: static !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  width: auto !important;
 }
 .nav-login-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 6px 14px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   border-radius: 999px;
   text-decoration: none;
   transition: all 0.15s ease;
+  width: auto !important;
 }
 .nav-login-link:hover {
   background: rgba(0, 0, 0, 0.05);
@@ -251,17 +259,30 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 18px;
+  padding: 7px 16px;
   font-size: 13px;
   font-weight: 700;
   border-radius: 999px;
   text-decoration: none;
+  width: auto !important;
+  white-space: nowrap;
   box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .nav-cta-pill:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(46, 125, 50, 0.4);
+}
+
+@media (max-width: 600px) {
+  /* On small mobile screens, keep only the high-converting "Get Started" inside the floating top capsule */
+  .nav-login-link {
+    display: none !important;
+  }
+  .nav-cta-pill {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
 }
 .nav-link {
   text-decoration: none;
