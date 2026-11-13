@@ -1644,12 +1644,59 @@ footer p { margin: 0; color: var(--text-secondary); }
   color: #fff !important;
 }
 
+/* Mobile top nav right actions */
+.mobile-nav-actions {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+.mobile-upgrade-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(230, 81, 0, 0.1);
+  color: #d35400;
+  border: 1px solid rgba(230, 81, 0, 0.25);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.mobile-upgrade-pill:hover {
+  background: #e65100;
+  color: #ffffff;
+}
+.mobile-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  background: transparent;
+  transition: all 0.15s ease;
+}
+.mobile-logout-btn:hover {
+  background: #fdecea;
+  color: #d32f2f;
+}
+[data-theme="dark"] .mobile-logout-btn:hover {
+  background: rgba(211, 47, 47, 0.15);
+  color: #ef5350;
+}
+
 @media (max-width: 768px) {
   .bottom-tab-bar { display: flex; }
   /* Push content up so FAB doesn't overlap it */
   body { padding-bottom: 72px; }
   /* Hide desktop nav links on mobile for authenticated users */
   .nav-links--desktop { display: none !important; }
+  /* Show mobile top actions */
+  .mobile-nav-actions { display: flex; }
 }
 
 /* ============================================================

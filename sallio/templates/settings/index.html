@@ -315,6 +315,57 @@
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════
+         SECTION 5 — SUBSCRIPTION & PLAN MANAGEMENT
+    ══════════════════════════════════════════════ -->
+    <div class="settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon" style="background: rgba(46, 125, 50, 0.1); color: var(--primary-color);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <div>
+                <h2 class="settings-card-title">Subscription & Plan</h2>
+                <p class="settings-card-sub">Manage your Sallio billing status</p>
+            </div>
+        </div>
+
+        {% if business.plan_type == 'premium' %}
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 16px; background: rgba(46, 125, 50, 0.08); border: 1px solid rgba(46, 125, 50, 0.2); border-radius: 10px;">
+                <div>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+                        <span>Sallio Premium</span>
+                        <span class="premium-badge">ACTIVE</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                        Automatic monthly renewal (&#8358;1,500/month)
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('billing.cancel_subscription') }}" onsubmit="return confirm('Are you sure you want to cancel your Premium subscription? You will lose access to vintage receipts, custom logo, and unlimited sales.');">
+                    <button type="submit" class="btn btn-sm" style="background: transparent; border: 1px solid #d32f2f; color: #d32f2f; padding: 8px 16px; width: auto; font-size: 13px; font-weight: 600;">
+                        Cancel Subscription
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 16px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px;">
+                <div>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">
+                        Free Plan
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                        Basic features with 15 receipts per week.
+                    </div>
+                </div>
+
+                <a href="{{ url_for('billing.upgrade') }}" class="btn btn-primary btn-sm" style="width: auto; padding: 8px 20px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Upgrade to Premium
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
 </div>
 
 <!-- Signature Modal -->
