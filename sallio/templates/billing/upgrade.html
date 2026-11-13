@@ -54,11 +54,22 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script>
 function payWithPaystack() {
-    const planCode = '{{ paystack_plan_code }}';
+    const planCode = '{{ paystack_plan_code }}'.trim();
+    const publicKey = '{{ paystack_public_key }}'.trim();
+
+    console.log("Initializing Paystack payment...", {
+        key_prefix: publicKey ? publicKey.substring(0, 8) + '...' : 'MISSING',
+        plan: planCode || 'None (one-time fallback)'
+    });
+
+    if (!publicKey) {
+        Sallio.error('Payment configuration error: Public key is missing.');
+        return;
+    }
+
     const setupConfig = {
-        key: '{{ paystack_public_key }}',
+        key: publicKey,
         email: '{{ user_email }}',
-        amount: 1500 * 100, // 1,500 NGN in kobo
         currency: 'NGN',
         ref: 'SALLIO_' + Math.floor((Math.random() * 1000000000) + 1),
         metadata: {
@@ -101,9 +112,11 @@ function payWithPaystack() {
         }
     };
 
-    // If a Paystack recurring Plan Code is provided in env, attach it
-    if (planCode && planCode.trim() !== '') {
-        setupConfig.plan = planCode.trim();
+    // When subscribing to a Paystack Plan, omit 'amount' (Paystack derives amount from the plan)
+    if (planCode) {
+        setupConfig.plan = planCode;
+    } else {
+        setupConfig.amount = 1500 * 100; // Fallback to 1,500 NGN if no plan code set
     }
 
     let handler = PaystackPop.setup(setupConfig);
